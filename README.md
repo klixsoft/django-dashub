@@ -16,7 +16,7 @@
 
 ## Installation
 
-Since Practet Dashboard is not yet available on PyPI, you need to install it directly from GitHub.
+Since Dashub is not yet available on PyPI, you need to install it directly from GitHub.
 
 ```bash
 pip install git+https://github.com/klixsoft/django-dashub.git
@@ -24,7 +24,7 @@ pip install git+https://github.com/klixsoft/django-dashub.git
 
 ## Configuration
 
-To use Practet Dashboard, add it to your Django project's installed apps:
+To use Dashub, add it to your Django project's installed apps:
 
 ```python
 INSTALLED_APPS = [
