@@ -19,7 +19,7 @@
 Since Dashub is not yet available on PyPI, you need to install it directly from GitHub.
 
 ```bash
-pip install git+https://github.com/klixsoft/django-dashub.git
+pip install django-dashub
 ```
 
 ## Configuration
@@ -35,6 +35,8 @@ INSTALLED_APPS = [
 ```
 
 ## Customization
+
+All the configuration settings for Dashub are defined in the `DASHHUB_SETTINGS` dictionary in your Django settings file. You can customize the appearance and behavior of the admin dashboard by modifying these settings.
 
 ### 1. Site Identification
 
