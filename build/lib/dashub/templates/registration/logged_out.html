@@ -1,0 +1,13 @@
+{% extends "registration/base.html" %}
+{% load dashub i18n %}
+{% get_dashub_settings request as dashub_settings %}
+
+{% block content %}
+    <p class="login-box-msg">{{ dashub_settings.welcome_sign }}</p>
+    <p class="text-center">
+        {% trans "Thanks for spending some quality time with the web site today." %}
+    </p>
+    <a class="btn btn-primary w-100" href="{% url 'admin:index' %}">
+        {% trans 'Log in again' %}
+    </a>
+{% endblock %}

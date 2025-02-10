@@ -1,0 +1,54 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static dashub %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block content_title %} {% trans 'Dashboard' %} {% endblock %}
+
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+        <li class="breadcrumb-item">{% trans 'Dashboard' %}</li>
+    </ol>
+{% endblock %}
+
+
+{% block content %}
+    {% get_side_menu using="app_list" as dashboard_list %}
+    {% if dashboard_list %}
+        {% widthratio dashboard_list|length 2 1 as middle %}
+    {% endif %}
+
+    <div class="col-12">
+        <div class="row">
+            {% for app in dashboard_list %}
+                {% for model in app.models %}
+                    {% if model.count >= 0 %}
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card dashboard_card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="avatar bg-dark bg-opacity-10 rounded">
+                                            <i class="{{ model.icon }} text-muted"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <p class="text-muted mb-0 text-truncate">{{ model.name }}</p>
+                                        <h3 class="text-dark mt-1 mb-0">{{ model.count  }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer py-2 bg-light bg-opacity-50">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <a href="{% if model.url %}{{ model.url }}{% else %}#!{% endif %}" class="text-reset fw-medium">View More</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
