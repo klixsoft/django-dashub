@@ -1,0 +1,7 @@
+include LICENSE
+include AUTHORS
+include README.md
+recursive-include filehub/templates *
+recursive-include filehub/static *
+recursive-include filehub/templatetags *
+recursive-include filehub/migrations *
