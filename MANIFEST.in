@@ -1,7 +1,7 @@
 include LICENSE
 include AUTHORS
 include README.md
-recursive-include filehub/templates *
-recursive-include filehub/static *
-recursive-include filehub/templatetags *
-recursive-include filehub/migrations *
+recursive-include dashub/templates *
+recursive-include dashub/static *
+recursive-include dashub/templatetags *
+recursive-include dashub/migrations *

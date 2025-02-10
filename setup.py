@@ -22,7 +22,7 @@ setup(
     ],
     include_package_data=True,
     package_data={
-        "django_filehub": [
+        "django_dashub": [
             "templates/*",
             "static/*",
             "templatetags/*",
