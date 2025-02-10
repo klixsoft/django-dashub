@@ -1,6 +1,6 @@
-<h1 align="center" id="title">Practet Dashboard</h1>
+<h1 align="center" id="title">Dashub</h1>
 
-<p align="center"><img src="https://socialify.git.ci/scthakuri/practet-dashboard/image?font=Inter&amp;forks=1&amp;issues=1&amp;language=1&amp;name=1&amp;owner=1&amp;pattern=Circuit%20Board&amp;pulls=1&amp;stargazers=1&amp;theme=Light" alt="project-image"></p>
+<p align="center"><img src="https://socialify.git.ci/klixsoft/django-dashub/image?font=Inter&amp;forks=1&amp;issues=1&amp;language=1&amp;name=1&amp;owner=1&amp;pattern=Circuit%20Board&amp;pulls=1&amp;stargazers=1&amp;theme=Light" alt="project-image"></p>
 
 <p>A modern Django admin dashboard with enhanced customization options, inspired by Jazzmin but featuring a fresh theme and additional functionality.</p>
 
@@ -19,13 +19,7 @@
 Since Practet Dashboard is not yet available on PyPI, you need to install it directly from GitHub.
 
 ```bash
-pip install git+https://github.com/scthakuri/practet-dashboard.git
-```
-
-Alternatively, you can clone the repository and install it manually:
-```bash
-git clone https://github.com/scthakuri/practet-dashboard.git
-cd practet-dashboard
+pip install git+https://github.com/klixsoft/django-dashub.git
 ```
 
 ## Configuration
@@ -34,7 +28,7 @@ To use Practet Dashboard, add it to your Django project's installed apps:
 
 ```python
 INSTALLED_APPS = [
-    'practet_dashboard',
+    'dashub',
     'django.contrib.admin',
     ...
 ]
@@ -42,75 +36,190 @@ INSTALLED_APPS = [
 
 ## Customization
 
-### Site Configuration
+### 1. Site Identification
 
-- `site_title` (str): The title of the site displayed in the header
-- `site_logo` (str): The Full URL of the logo displayed in the header
-- `site_icon` (str): The Full URL of the favicon displayed in the browser tab
-- `theme_color` (str): Hex color code for the primary theme color.
+### `site_logo`
+Defines the path to the site logo image.
 
-### UI Enhancement
+- **Example:**
+  ```python
+  "site_logo": "/static/logo.svg"
+  
+### `site_icon`
+Defines the path to the site's favicon.
 
-- `related_modal` (bool): Enable related modal for improved usability for related objects.
+- **Example:**
+  ```python
+  "site_icon": "/static/favicon.ico"
 
-### Menu Ordering
+### `theme_color`
+Sets the theme color for the site. This will reflect in the browser's address bar or UI elements.
 
-- `order_menus` (list): A list of app names to order the menu items. The default order is the order of the installed apps.
-  - `app` (str): The name of the app
-  - `order` (int): The order of the app in the menu
-  - `models` (list): List of models with custom order inside the app.
+- **Example:**
+  ```python
+  "theme_color": "#31aa98"
+  
 
-### Enable Submenu for Models
+### 2. **Hide Models**
 
-- `submenus_models` (list): List of models that will have submenus.
+### `hide_models`
+This setting allows you to hide specific models in the Django admin panel. Models are specified using the `{app_name}.{model_name}` format, in lowercase. You can hide multiple models by listing them in an array.
 
-### Custom Links
+- **Format:**
+  ```python
+  "hide_models": [
+      "app_name.model_name",
+      "another_app.another_model"
+  ]
+  ```
 
-- `custom_links` (list): List of custom links to display in the sidebar.
-  - `name` (str): The name of the link
-  - `url` (str): The URL of the link
-  - `icon` (str): The Font Awesome icon class
-  - `submenu` (list): List of submenus for the custom link
-    - `name` (str): The name of the submenu
-    - `url` (str): The URL of the submenu
+- **Example:**
+  ```python
+  "hide_models": [
+      "user.group",
+  ]
+  ```
 
-## Example Configuration
+This configuration hides the `group` model from the `user` app.
 
+---
+
+## 3. **Custom Links**
+
+### `custom_links`
+Custom links are used to add new sections or menus to the sidebar of the admin interface. You can create custom sections by providing an array of menus under specific app names. 
+
+Each menu item can have the following options:
+- `name` (optional): The name of the menu item.
+- `url` (optional): The URL to be linked to.
+- `icon` (optional): The icon to display for the menu item (using Font Awesome classes).
+- `order` (optional): Defines the order of the menu item (higher numbers appear higher).
+- `submenu` (optional): A list of submenus within the menu. Each submenu can contain either a `model` key or an entire submenu structure.
+- `model` (optional): If a model is passed, it will link directly to that model, removing the need to provide a `name` or `url`. Models are specified in lowercase as `{app_name}.{model_name}`.
+
+Either model or name and URL are required for each menu item.
+
+If the app specified in `custom_links` does not exist, it will create a new section for that app in the sidebar.
+
+#### Example:
 ```python
-PRACTET_DASHBOARD_SETTINGS = {
-    "site_title": "Practet Dashboard",
-    "site_logo": "https://cdn.practet.com/static/logo-new.webp",
-    "site_icon": "https://practet.com/static/favicon/favicon.ico",
-    "theme_color": "#e31837",
-    "related_modal_active": True,
-    "order_menus": [
-        {"app": "user", "order": 1},
-        {"app": "advance", "order": 3},
-        {
-            "app": "oauth2_provider",
-            "order": 2,
-            "models": [
-                {"model": "Applications", "order": 1},
-                {"model": "Grant", "order": 2},
-            ],
-        },
-    ],
-    "submenus_models": ["user.user"],
-    "custom_links": {
-        "advance": [
-            {
-                "name": "File Manager",
-                "url": "/admin/filehub/",
-                "icon": "fas fa-folder",
-                "submenu": [
-                    {"name": "File Manager", "url": "/admin/filehub/"},
-                    {"name": "Settings", "url": "/admin/filehub/settings/"},
-                ],
-            }
-        ]
-    }
+"custom_links": {
+    "advance": [
+        {"name": "File Manager", "url": "/admin/filemanager/", "icon": "fa-solid fa-folder", "order": 1},
+        {"model": "user.group", "icon": "fa-solid fa-user", "order": 2}
+    ]
 }
 ```
+
+In this example:
+- The "advance" section contains two menu items: "File Manager" and "User". If the "advance" section does not exist, it will be created. If exists then it will add the menu items to the existing section.
+
+### 4. Submenus with Models
+If you want a submenu to link to specific models, you can specify the `model` directly. This removes the need for a `url` or `name` in the submenu item.
+
+#### Example:
+```python
+"core": [
+    {
+        "name": "User Management",
+        "icon": "fa-solid fa-users",
+        "submenu": [
+            {"model": "auth.user", "order": 1},
+            {"model": "auth.group", "order": 2}
+        ]
+    }
+]
+```
+
+In this example, the submenu under "User Management" links directly to `auth.user` and `auth.group` models.
+
+---
+
+## 5. **Model Submenus**
+
+### `model_submenus`
+The `model_submenus` setting allows you to link specific models to submenus under other models or app sections. The configuration for model submenus is similar to that of `custom_links`, allowing you to specify both `model` and `submenu` for any app.
+
+Each submenu can also contain a `model` key and/or a `submenu` structure.
+
+- **Format:**
+  ```python
+  "model_submenus": {
+      "app_name.model_name": [
+          {"model": "app_name.model_name", "order": 1},
+          {"model": "another_app.another_model", "order": 2}
+      ]
+  }
+  ```
+
+- **Example:**
+  ```python
+  "model_submenus": {
+      "core.post": [
+          {"model": "core.postcategory", "order": 1}
+      ]
+  }
+  ```
+
+In this configuration:
+- The `core.post` model has a submenu linking to the `core.postcategory` model.
+
+Submenus can also have their own submenu structure, just like the `custom_links` setting.
+
+---
+
+## 6. **Default Orders**
+
+### `default_orders`
+The `default_orders` setting defines the order in which menus and models are displayed in the admin interface. This helps control the sequence of items shown in the sidebar and the admin list views. A higher value indicates higher priority (i.e., the item appears at the top).
+
+- **Format:**
+  ```python
+  "default_orders": {
+      "app_name": order_value,
+      "app_name.model_name": order_value
+  }
+  ```
+
+- **Example:**
+  ```python
+  "default_orders": {
+      "core": 10,
+      "core.page": 2,
+      "core.post": 1,
+      "user": 20
+  }
+  ```
+
+In this example:
+- The `user` app has the highest priority (order `20`) so appear it first.
+- The `core.page` model has the highest order (`1`), meaning it will be shown first.
+
+---
+
+## 7. **Icons**
+
+### `icons`
+The `icons` setting allows you to define icons for models and their submenus using Font Awesome class names. Icons are applied to models directly and help improve the visual presentation of the dashboard.
+
+- **Format:**
+  ```python
+  "icons": {
+      "app_name.model_name": "fa-icon-class"
+  }
+  ```
+
+- **Example:**
+  ```python
+  "icons": {
+      "core.page": "fa-regular fa-file",
+      "core.post": "fa-regular fa-newspaper",
+  }
+  ```
+
+This configuration assigns icons to `core.page`, `core.post`, and `healthpackage.lab` using Font Awesome icon classes.
+
+- **Note:** Icons are only applied to models. Submenus do not have icons.
 
 ## Dependencies
 
@@ -127,7 +236,7 @@ Contributions are welcome! Please follow these steps:
 2. Create a feature branch
 3. Submit a Pull Request
 
-GitHub Repository: [https://github.com/scthakuri/practet-dashboard](https://github.com/scthakuri/practet-dashboard)
+GitHub Repository: [https://github.com/klixsoft/django-dashub](https://github.com/klixsoft/django-dashub)
 
 ## License
 
