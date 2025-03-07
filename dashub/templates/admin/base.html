@@ -71,22 +71,27 @@
                 <!-- [Mobile Media Block end] -->
                 <div class="ms-auto">
                     <ul class="list-unstyled">
+                        <li class="ps-h-item">
+                            <a href="/" class="ps-head-link me-0" target="_blank">
+                                <i class="fa fa-globe"></i>
+                            </a>
+                        </li>
                         <li class="dropdown dropdown-user ps-h-item">
                             <a class="ps-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#"
-                               role="button" aria-haspopup="false" data-bs-auto-close="outside" aria-expanded="false">
-                                <img src="{{ request.user.get_avatar }}" alt="user-image" class="user-avatar"/>
+                            role="button" aria-haspopup="false" data-bs-auto-close="outside" aria-expanded="false">
+                                <img src="{{ request.user.get_avatar|default:'/static/assets/img/user.png' }}" 
+                                    alt="user-image" class="user-avatar"/>
                             </a>
                             <div class="dropdown-menu dropdown-menu-end ps-h-dropdown">
                                 <div class="dropdown-header px-0 mb-2 d-flex align-items-center justify-content-between">
                                     <h5 class="m-0">Profile</h5>
                                 </div>
                                 <div class="dropdown-body">
-                                    <div class="notification-scroll position-relative"
-                                         style="max-height: calc(100vh - 225px)">
+                                    <div class="notification-scroll position-relative" style="max-height: calc(100vh - 225px)">
                                         <div class="d-flex mb-1">
                                             <div class="flex-shrink-0">
-                                                <img src="{{ request.user.get_avatar }}" alt="{{ request.user }}"
-                                                     class="user-avatar wid-35"/>
+                                                <img src="{{ request.user.get_avatar|default:'/static/assets/img/user.png' }}" 
+                                                    alt="{{ request.user }}" class="user-avatar wid-35"/>
                                             </div>
                                             <div class="flex-grow-1 ms-3">
                                                 <h6 class="mb-1">{{ request.user }}</h6>
@@ -98,16 +103,16 @@
                                         {% get_user_menu user request.current_app|default:"admin" as user_menu %}
                                         {% for link in user_menu %}
                                             <a href="{{ link.url }}" class="dropdown-item">
-                                            <span>
-                                                <i class="ps-icon text-muted me-2 {{ link.icon }}"></i>
-                                                <span>{% trans link.name %}</span>
-                                            </span>
+                                                <span>
+                                                    <i class="ps-icon text-muted me-2 {{ link.icon }}"></i>
+                                                    <span>{% trans link.name %}</span>
+                                                </span>
                                             </a>
                                         {% endfor %}
 
                                         {% if perms|can_view_self %}
                                             <a href="{% jazzy_admin_url request.user request.current_app|default:"admin" %}"
-                                               class="dropdown-item">
+                                            class="dropdown-item">
                                                 <span>
                                                     <i class="ps-icon text-muted me-2 fa fa-user"></i>
                                                     <span>{% trans 'View Profile' %}</span>
@@ -134,6 +139,7 @@
                                 </div>
                             </div>
                         </li>
+
                     </ul>
                 </div>
             </div>
@@ -147,7 +153,7 @@
             <nav class="ps-sidebar">
                 <div class="navbar-wrapper">
                     <div class="m-header">
-                        <a href="" class="b-brand text-primary">
+                        <a href="/admin" class="b-brand text-primary">
                             <img src="{{ dashub_settings.site_logo }}" class="img-fluid logo-lg"
                                  alt="{{ dashub_settings.site_title }}">
                         </a>
@@ -157,8 +163,7 @@
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
                                     <div class="flex-shrink-0">
-                                        <img src="{{ request.user.get_avatar }}" alt="user-image"
-                                             class="user-avatar wid-45 rounded-circle"/>
+                                        <img src="{% if request.user.get_avatar %}{{ request.user.get_avatar }}{% else %}{% static 'assets/img/user.png' %}{% endif %}" alt="user-image" class="user-avatar wid-45 rounded-circle"/>
                                     </div>
                                     <div class="flex-grow-1 ms-3 me-2">
                                         <h6 class="mb-0">{{ request.user }}</h6>
@@ -302,7 +307,7 @@
                 <div class="footer-wrapper container-fluid">
                     <div class="row">
                         <div class="col my-1">
-                            <p class="m-0">Copyright &copy; 2023 | All Right Reserved</p>
+                            <p class="m-0">Copyright &copy; {% now "Y" %} | All Rights Reserved</p>
                         </div>
                         <div class="col-auto my-1">
                             <ul class="list-inline footer-link mb-0">
@@ -317,7 +322,6 @@
             <!-- [ Footer ] end -->
         {% endif %}
     {% endblock %}
-
 </div>
 
 <!-- Required Js -->
