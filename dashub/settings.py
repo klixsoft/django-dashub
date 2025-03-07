@@ -16,7 +16,7 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     # Title on the brand (19 chars max) (will default to current_admin_site.site_header)
     "site_brand": None,
     # URL of the logo for your site, used for brand on top left
-    "site_logo": "https://cdn.practet.com/static/logo-new.webp",
+    "site_logo": "/static/assets/img/logo.png",
     # Relative path to a favicon for your site, will default to site_logo if absent (ideally 32x32 px)
     "site_icon": None,
     ############
