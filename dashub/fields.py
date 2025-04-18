@@ -22,18 +22,23 @@ class TagInputField(models.TextField):
         return super().formfield(**defaults)
 
     def from_db_value(self, value, expression, connection):
-        if not value or value.strip() == "":
+        if value is None or value.strip() == "":
             return []
         return value.split(self.separator)
 
     def to_python(self, value):
+        if value is None:
+            return []
         if isinstance(value, list):
             return value
-        if not value or value.strip() == "":
-            return []
-        return value.split(self.separator)
+        if isinstance(value, str):
+            value = value.strip()
+            return value.split(self.separator) if value else []
+        return []
 
     def get_prep_value(self, value):
+        if value is None:
+            return ""
         if isinstance(value, list):
             return self.separator.join(value)
         return value

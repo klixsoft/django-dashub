@@ -466,8 +466,7 @@
             if ($(this).closest(".empty-form").length <= 0) {
                 const formRowEle = $(this).closest(".form-row");
                 if (formRowEle.find("tags").length <= 0) {
-                    const delimiter = formRowEle.find(".dashub_tag_input").attr("data-separator");
-                    console.log("Delimiter", delimiter)
+                    const delimiter = $(this).attr("data-separator");
                     new Tagify($(this)[0], {
                         originalInputValueFormat: valuesArr => valuesArr.map(item => item.value).join(delimiter),
                         delimiters: delimiter

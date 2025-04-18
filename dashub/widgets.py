@@ -54,9 +54,12 @@ class TagInputWidget(forms.Textarea):
         css = {"all": ("https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css",)}
 
     def format_value(self, value):
-        if isinstance(value, list):
-            return self.separator.join(value)
-        return value
+        if value is not None:
+            if isinstance(value, list):
+                return self.separator.join(value)
+            elif isinstance(value, str):
+                return value.strip()
+        return ""
 
 
 class AdminTagInputWidget(TagInputWidget, admin_widgets.AdminTextareaWidget):
