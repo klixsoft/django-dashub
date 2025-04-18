@@ -1,5 +1,5 @@
 {% load i18n admin_urls static %}
-<div class="js-inline-admin-formset inline-group" id="{{ inline_admin_formset.formset.prefix }}-group" data-inline-type="stacked" data-inline-formset="{{ inline_admin_formset.inline_formset_data }}">
+<div class="js-inline-admin-formset stacked-inline-group inline-group m-3" id="{{ inline_admin_formset.formset.prefix }}-group" data-inline-type="stacked" data-inline-formset="{{ inline_admin_formset.inline_formset_data }}">
     <fieldset class="module {{ inline_admin_formset.classes }} card card-outline">
         <div class="card-body">
             {{ inline_admin_formset.formset.management_form }}
@@ -9,13 +9,13 @@
                 <div class="panel inline-related{% if inline_admin_form.original or inline_admin_form.show_url %} has_original{% endif %}{% if forloop.last and inline_admin_formset.has_add_permission %} empty-form last-related{% endif %}"
                      id="{{ inline_admin_formset.formset.prefix }}-{% if not forloop.last %}{{ forloop.counter0 }}{% else %}empty{% endif %}">
                     <div class="card card-outline {% if not inline_admin_form.original %}new-stacked card-success{% else %}card-secondary{% endif %}">
-                        <div class="card-header">
+                        <div class="card-header d-flex align-items-center justify-content-between cursor-pointer">
                             <h3 class="card-title">
-                                <span class="card-tools text-sm">
+                                <span class="card-tools d-inline-flex align-items-center gap-6px text-sm">
                                 {% if inline_admin_form.original %}
                                     {% if inline_admin_form.model_admin.show_change_link and inline_admin_form.model_admin.has_registered_model %}
                                         <a
-                                            href="{% url inline_admin_form.model_admin.opts|admin_urlname:'change' inline_admin_form.original.pk|admin_urlquote %}" 
+                                            href="{% url inline_admin_form.model_admin.opts|admin_urlname:'change' inline_admin_form.original.pk|admin_urlquote %}"
                                             class="{% if inline_admin_formset.has_change_permission %}inlinechangelink{% else %}inlineviewlink{% endif %}">
                                         {% if inline_admin_formset.has_change_permission %}
                                             <i class="fas fa-pencil-alt fa-sm"> </i>
@@ -26,7 +26,7 @@
                                     {% endif %}
                                 {{ inline_admin_form.original }}
                                 {% else %}
-                                    <i class="fas fa-plus fa-sm text-success"> </i>
+                                    <i class="hgi hgi-stroke hgi-plus-sign-circle text-success"></i>
                                     {% trans "New" %} {{ inline_admin_formset.opts.verbose_name|capfirst }}
                                 {% endif %}
                                 </span>

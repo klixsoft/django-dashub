@@ -1,0 +1,25 @@
+{% load dashub %}
+{% if widget.is_initial %}<div class="file-upload">{% endif %}
+<input type="{{ widget.type }}" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+
+{% if widget.is_initial and widget.value.url %}
+    <div class="file_preview_wrapper mt-3">
+        {% if widget.value.url|is_path_image %}
+            <img src="{{ widget.value.url }}" alt="Image preview"
+                     style="width: 200px; height: 200px; object-fit: cover;object-position: top;border-radius:10px;">
+        {% else %}
+            <a href="{{ widget.value.url }}">{{ widget.value }}</a>
+        {% endif %}
+
+        {% if not widget.required %}
+            <span class="clearable-file-input">
+            <input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}"
+                    {% if widget.attrs.disabled %}
+                   disabled{% endif %}{% if widget.attrs.checked %} checked{% endif %}>
+            <label for="{{ widget.checkbox_id }}">{{ widget.clear_checkbox_label }}</label>
+        </span>
+        {% endif %}
+    </div>
+{% endif %}
+{% if widget.is_initial %}</div>{% endif %}
+

@@ -1,4 +1,5 @@
 import copy
+import html
 import itertools
 import json
 import logging
@@ -20,7 +21,7 @@ from django.db.models.base import ModelBase
 from django.template import Context, Library
 from django.template.defaultfilters import capfirst
 from django.template.loader import get_template
-from django.templatetags.static import static
+from django.templatetags.static import static, StaticNode
 from django.urls import reverse
 from django.utils.html import escape, format_html
 from django.utils.safestring import SafeText, mark_safe
@@ -94,11 +95,10 @@ def get_side_menu(context: Context, using: str = "available_apps") -> List[Dict[
             })
 
     custom_links = {
-        app_name: make_menu(user, links, options, allow_appmenus=False)
+        app_name: make_menu(user, links, options, app_name, allow_appmenus=False)
         for app_name, links in options.get("custom_links", {}).items()
     }
 
-    model_submenus = options.get("model_submenus", {})
     submenus_models = set(options.get("submenus_models", []))
     hidden_apps = set(options.get("hide_apps", []))
     hidden_models = set(options.get("hide_models", []))
@@ -116,8 +116,10 @@ def get_side_menu(context: Context, using: str = "available_apps") -> List[Dict[
 
         menu_items = []
 
+        app_custom_links = custom_links.get(app_label, [])
         for model in app.get("models", []):
-            model_str = f"{app_label}.{model['object_name']}".lower()
+            model_object_name = str(model['object_name']).lower()
+            model_str = f"{app_label}.{model_object_name}".lower()
             if model_str in hidden_models:
                 continue
 
@@ -127,25 +129,29 @@ def get_side_menu(context: Context, using: str = "available_apps") -> List[Dict[
             model["icon"] = options["icons"].get(model_str, options["default_icon_children"])
             model["order"] = model.get("order", default_orders.get(model_str, 0))
 
+            finded_menus = {}
+            if app_custom_links:
+                finded_menus = next((item for item in app_custom_links if item['object_name'] == model_str), None)
+
             if model_str in submenus_models:
                 submenu = [{"name": "Add New", "url": model["add_url"], "order": 0},
                            {"name": model["name"], "url": model["url"], "order": 0}]
-
-                for submenu_item in model_submenus.get(model_str, []):
-                    if "model" in submenu_item:
-                        model_info = get_model_info(submenu_item["model"])
-                        submenu_item["name"] = model_info["name"]
-                        submenu_item["submenu_str"] = slugify(model_info["name"]).replace("-", "")
-                        submenu_item["url"] = model_info["url"]
-                        submenu_item["order"] = submenu_item["order"] if "order" in submenu_item else default_orders.get(submenu_item["submenu_str"], 0)
-                    submenu.append(submenu_item)
-                model["submenu"] = sorted(submenu, key=lambda x: x["order"], reverse=True)
+            else:
+                submenu = []
+            if finded_menus:
+                custom_links_submenus = finded_menus.get("submenu", [])
+                submenu.extend(custom_links_submenus)
+                app_custom_links = [link for link in app_custom_links if link['name'] != model_object_name]
+            model["submenu"] = sorted(submenu, key=lambda x: x.get("order", 0), reverse=True)
             menu_items.append(model)
-        menu_items.extend(custom_links.get(app_label, []))
-
-        if app_label == "consultation":
-            print(custom_links)
-            print(menu_items)
+        if app_custom_links:
+            for new_link in app_custom_links:
+                if not any(
+                        (existing_link.get('url') == new_link.get('url')) or
+                        (existing_link.get('model_str') == new_link.get('object_name'))
+                        for existing_link in menu_items
+                ):
+                    menu_items.append(new_link)
 
         if menu_items:
             app["models"] = sorted(menu_items, key=lambda x: x.get("order", 0))
@@ -185,7 +191,7 @@ def get_top_menu(user: AbstractUser, admin_site: str = "admin") -> List[Dict]:
     Produce the menu for the top nav bar
     """
     options = get_settings()
-    return make_menu(user, options.get("topmenu_links", []), options, allow_appmenus=True, admin_site=admin_site)
+    return make_menu(user, options.get("topmenu_links", []), options, None, allow_appmenus=True, admin_site=admin_site)
 
 
 @register.simple_tag
@@ -198,6 +204,7 @@ def get_user_menu(user: AbstractUser, admin_site: str = "admin") -> List[Dict]:
         user,
         options.get("usermenu_links", []),
         options,
+        None,
         allow_appmenus=False,
         admin_site=admin_site,
     )
@@ -240,7 +247,7 @@ def get_user_avatar(user: AbstractUser) -> str:
         - URLField/Charfield on the model
         - A callable that receives the user instance e.g lambda u: u.profile.image.url
     """
-    no_avatar = static("vendor/adminlte/img/user2-160x160.jpg")
+    no_avatar = static("assets/img/user.svg")
     options = get_settings()
     avatar_field_name: Optional[Union[str, Callable]] = options.get("user_avatar")
 
@@ -361,6 +368,9 @@ def dashub_list_filter(cl: ChangeList, spec: ListFilter) -> SafeText:
 
         # Iterate matches, use original as actual values, additional for hidden
         i = 0
+        if field_key == "country":
+            print(spec)
+            print(field_key, matches.items())
         for key, value in matches.items():
             if i == 0:
                 choice["name"] = key
@@ -646,3 +656,11 @@ def render_form_field_class(field, css_class=None):
 
     widget.attrs["class"] = " ".join(class_list)
     return field
+
+
+@register.filter
+def is_path_image(path: str) -> bool:
+    """
+    Check if the given path is an image
+    """
+    return path.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".avif", ".svg", ".webp"))

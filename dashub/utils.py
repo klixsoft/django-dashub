@@ -8,6 +8,7 @@ from django.contrib.admin.helpers import AdminForm
 from django.contrib.auth.models import AbstractUser
 from django.db.models.base import Model, ModelBase
 from django.db.models.options import Options
+from django.utils.text import slugify
 from django.utils.translation import gettext
 
 from .compat import NoReverseMatch, reverse
@@ -51,15 +52,14 @@ def order_menus_with_order(original: List[Dict[str, Any]], order_list: List[Dict
                     model["order"] = model_entry["order"]
 
                 # Also order submenus if they exists
-                print("Submenus", model.get("submenus"))
                 if "submenus" in model and isinstance(model["submenus"], list):
                     model["submenus"] = [submenu.get("order", 0) for submenu in model["submenus"]]
-                    print(model["submenus"])
                     model["submenus"] = model["submenus"].sort(key=lambda x: x["order"], reverse=True)
 
             item["models"].sort(key=lambda x: x["order"], reverse=True)
     original.sort(key=lambda x: x["order"], reverse=True)
     return original
+
 
 def get_admin_url(instance: Any, admin_site: str = "admin", from_app: bool = False, **kwargs: str) -> str:
     """
@@ -192,6 +192,7 @@ def manage_submenu(submenus: List[Dict], options: Dict) -> List[Dict]:
                         "name": model.verbose_name_plural.title(),
                         "url": get_admin_url(submenu["model"]),
                         "icon": submenu.get("icon", options["default_icon_children"]),
+                        "order": submenu.get("order", 0),
                     }
                 )
         elif "url" in submenu:
@@ -200,12 +201,91 @@ def manage_submenu(submenus: List[Dict], options: Dict) -> List[Dict]:
                     "name": submenu.get("name", "unspecified"),
                     "url": get_custom_url(submenu["url"]),
                     "icon": submenu.get("icon", options["default_icon_children"]),
+                    "order": submenu.get("order", 0),
                 }
             )
     return output
 
+
+def make_single_menu(model_permissions: set[str], user: AbstractUser, link: Dict, options: Dict, app_name: Union[str, None],
+                     allow_appmenus: bool = True, admin_site: str = "admin") -> List[Dict]:
+
+    menu = []
+    if isinstance(link, str):
+        return menu
+
+    perm_matches = []
+    link_permissions = link.get("permissions", [])
+    for perm in link_permissions:
+        perm_matches.append(user.has_perm(perm))
+
+    if not all(perm_matches):
+        return menu
+
+    # Url links
+    if "url" in link:
+        identifier_name = slugify(link.get("name", "unspecified"))
+        menu.append(
+            {
+                "object_name": identifier_name,
+                "name": link.get("name", "unspecified"),
+                "url": get_custom_url(link["url"], admin_site=admin_site),
+                "children": [],
+                "new_window": link.get("new_window", False),
+                "icon": link.get("icon", options["default_icon_children"]),
+                "submenu": manage_submenu(link.get("submenu", []), options),
+                "order": link.get("order", 0),
+            }
+        )
+    # Model links
+    elif "model" in link:
+        model_label = link["model"].lower()
+        app_permission = model_label
+        if app_name and "." not in model_label:
+            app_permission = f"{app_name}.{model_label}"
+        if model_label not in model_permissions and app_permission not in model_permissions:
+            return []
+
+        _meta = get_model_meta(link["model"])
+
+        name = _meta.verbose_name_plural.title() if _meta else link["model"]
+        menu.append(
+            {
+                "object_name": model_label,
+                "name": name,
+                "url": get_admin_url(link["model"], admin_site=admin_site),
+                "children": [],
+                "new_window": link.get("new_window", False),
+                "icon": options["icons"].get(link["model"], options["default_icon_children"]),
+                "submenu": manage_submenu(link.get("submenu", []), options),
+                "order": link.get("order", 0),
+            }
+        )
+
+    # App links
+    elif "app" in link and allow_appmenus:
+        children = [
+            {"name": child.get("verbose_name", child["name"]), "url": child["url"], "children": None}
+            for child in get_app_admin_urls(link["app"], admin_site=admin_site)
+            if child["model"] in model_permissions
+        ]
+        if len(children) == 0:
+            return []
+
+        menu.append({
+            "object_name": link["app"],
+            "name": getattr(apps.app_configs[link["app"]], "verbose_name", link["app"]).title(),
+            "url": "#",
+            "children": children,
+            "icon": options["icons"].get(link["app"], options["default_icon_children"]),
+            "order": link.get("order", 0),
+        })
+    return menu
+
+
 def make_menu(
-        user: AbstractUser, links: List[Dict], options: Dict, allow_appmenus: bool = True, admin_site: str = "admin"
+        user: AbstractUser, links: List[Dict], options: Dict, app_name: Union[str, None], allow_appmenus: bool = True,
+        admin_site: str = "admin"
 ) -> List[Dict]:
     """
     Make a menu from a list of user supplied links
@@ -216,63 +296,11 @@ def make_menu(
     model_permissions = get_view_permissions(user)
 
     menu = []
-    for link in links:
-        perm_matches = []
-        for perm in link.get("permissions", []):
-            perm_matches.append(user.has_perm(perm))
-
-        if not all(perm_matches):
-            continue
-
-        # Url links
-        if "url" in link:
-            menu.append(
-                {
-                    "name": link.get("name", "unspecified"),
-                    "url": get_custom_url(link["url"], admin_site=admin_site),
-                    "children": None,
-                    "new_window": link.get("new_window", False),
-                    "icon": link.get("icon", options["default_icon_children"]),
-                    "submenu": manage_submenu(link.get("submenu", []), options)
-                }
-            )
-
-        # Model links
-        elif "model" in link:
-            if link["model"].lower() not in model_permissions:
-                continue
-
-            _meta = get_model_meta(link["model"])
-
-            name = _meta.verbose_name_plural.title() if _meta else link["model"]
-            menu.append(
-                {
-                    "name": name,
-                    "url": get_admin_url(link["model"], admin_site=admin_site),
-                    "children": [],
-                    "new_window": link.get("new_window", False),
-                    "icon": options["icons"].get(link["model"], options["default_icon_children"]),
-                }
-            )
-
-        # App links
-        elif "app" in link and allow_appmenus:
-            children = [
-                {"name": child.get("verbose_name", child["name"]), "url": child["url"], "children": None}
-                for child in get_app_admin_urls(link["app"], admin_site=admin_site)
-                if child["model"] in model_permissions
-            ]
-            if len(children) == 0:
-                continue
-
-            menu.append(
-                {
-                    "name": getattr(apps.app_configs[link["app"]], "verbose_name", link["app"]).title(),
-                    "url": "#",
-                    "children": children,
-                    "icon": options["icons"].get(link["app"], options["default_icon_children"]),
-                }
-            )
+    if isinstance(links, list):
+        for link in links:
+            menu.extend(make_single_menu(model_permissions, user, link, options, app_name, allow_appmenus, admin_site))
+    elif isinstance(links, dict):
+        menu.extend(make_single_menu(model_permissions, user, links, options, app_name, allow_appmenus, admin_site))
 
     return menu
 
@@ -310,3 +338,4 @@ def hex_to_rgb(hex_color):
 
     r, g, b = (int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
     return f"{r}, {g}, {b}"
+

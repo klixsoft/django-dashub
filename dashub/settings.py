@@ -45,8 +45,8 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     # UI Tweaks #
     #############
     # Relative paths to custom CSS/JS scripts (must be present in static files)
-    "custom_css": None,
-    "custom_js": None,
+    "custom_css": [],
+    "custom_js": [],
     ###############
     # Change view #
     ###############
@@ -63,7 +63,8 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "language_chooser": False,
     "theme_color": "#e31837",
     "model_submenus": {},
-    "related_modal_active": True
+    "related_modal_active": True,
+    "use_compressed_assets": False,
 }
 
 CHANGEFORM_TEMPLATES = {
@@ -77,7 +78,7 @@ CHANGEFORM_TEMPLATES = {
 
 def get_settings() -> Dict:
     dashub_settings = copy.deepcopy(DEFAULT_SETTINGS)
-    user_settings = {x: y for x, y in getattr(settings, "DASHHUB_SETTINGS", {}).items() if y is not None}
+    user_settings = {x: y for x, y in getattr(settings, "DASHUB_SETTINGS", {}).items() if y is not None}
     dashub_settings.update(user_settings)
 
     # Deal with single strings in hide_apps/hide_models and make sure we lower case 'em
