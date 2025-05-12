@@ -455,7 +455,18 @@
     // initSortable(".tabular-inline-group", "tr.form-row:not(.empty-form)");
 
     $(document).on("click", ".djn-inline-form .djn-drag-handler", function () {
-        $(this).closest(".djn-inline-form").find(".djn-item-content").slideToggle();
+        const itemEle = $(this).closest(".djn-item");
+        if( itemEle.length > 0 ){
+            const contentEle = $(this).closest(".djn-inline-form").find(".djn-item-content");
+            const isVisible = contentEle.is(":visible");
+            if( isVisible ){
+                contentEle.slideUp();
+                itemEle.removeClass("open");
+            }else{
+                contentEle.slideDown();
+                itemEle.addClass("open");
+            }
+        }
     })
 
     // Initially collapse all inline forms

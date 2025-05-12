@@ -40,7 +40,7 @@
 
                             <h3 class="{% if not inline_opts.sortable_options or not inline_opts.sortable_options.disabled %} djn-drag-handler{% endif %}">
                                         <span>
-                                            <span class="label">{{ inline_admin_formset.opts.verbose_name|capfirst }} #{{ forloop.counter }}:</span>
+                                            <span class="label">{{ inline_admin_formset.opts.verbose_name|capfirst }}:</span>
                                             <span class="inline_label">
                                                 {% if inline_admin_form.original %}
                                                     {{ inline_admin_form.original }}
