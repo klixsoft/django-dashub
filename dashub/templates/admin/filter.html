@@ -1,15 +1,58 @@
+{% load dashub %}
 {% load i18n %}
 
+<style>
+    #filtersOffcanvas .form-group h5 {
+        font-weight: 500;
+        font-size: 17px;
+        margin-bottom: 16px;
+        text-transform: capitalize;
+    }
+
+    #filtersOffcanvas .form-group {
+        margin-bottom: 1rem;
+    }
+
+    #filtersOffcanvas .offcanvas-footer {
+        padding: 10px;
+        border-top: 1px dashed var(--dh-sidebar-border-color);
+    }
+
+    #filtersOffcanvas .offcanvas-header {
+        border-bottom: 1px dashed var(--dh-sidebar-border-color);
+    }
+
+    #filtersOffcanvas .offcanvas-footer .btn {
+        width: 100%;
+    }
+</style>
+
 <div class="form-group">
-    <select class="form-control search-filter" style="width: 100%;" tabindex="-1" aria-hidden="true" data-name="{{ field_name }}">
-        <option value="">{{ title }}</option>
-        <option value="">---------</option>
+    <h5>{% blocktranslate with filter_title=title %} By {{ filter_title }} {% endblocktranslate %}</h5>
+
+    {% if spec|class_name == "CheckboxFilter" %}
         {% for choice in choices %}
-            {% if choice.name %}
-                <option data-name="{{ choice.name }}" value="{{ choice.value }}" {% if choice.selected %}selected {% endif %}>
+            <div class="form-check">
+                <input class="form-check-input" name="{{ field_name }}" type="radio"
+                       {% if choice.selected %}checked{% endif %} value="{{ choice.value }}"
+                       id="filter_{{ choice.value }}">
+                <label class="form-check-label" for="filter_{{ choice.value }}">
                     {{ choice.display }}
-                </option>
-            {% endif %}
+                </label>
+            </div>
         {% endfor %}
-    </select>
+    {% else %}
+        <select class="form-control" style="width: 100%;" tabindex="-1" aria-hidden="true"
+                name="{{ field_name }}">
+            <option value="">---------</option>
+            {% for choice in choices %}
+                {% if choice.name %}
+                    <option data-name="{{ choice.name }}" value="{{ choice.value }}"
+                            {% if choice.selected %}selected {% endif %}>
+                        {{ choice.display }}
+                    </option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    {% endif %}
 </div>

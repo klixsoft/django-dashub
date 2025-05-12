@@ -4,7 +4,8 @@
     {% if has_add_permission %}
         {% url cl.opts|admin_urlname:'add' as add_url %}
         <a href="{% add_preserved_filters add_url is_popup to_field %}" class="btn d-flex align-items-center justify-content-center btn-primary float-right">
-            <i class="hgi hgi-stroke hgi-plus-sign-circle"></i> &nbsp; {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}
+            <i class="hgi hgi-stroke hgi-plus-sign-circle"></i> &nbsp;
+            {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}
         </a>
     {% endif %}
 {% endblock %}

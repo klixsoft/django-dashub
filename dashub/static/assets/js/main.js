@@ -11,20 +11,21 @@
     };
 
     /*
-        Toggle 'open' class on click of element with class 'ps-hasmenu'
+        Toggle 'open' class on click of element with class 'dh-hasmenu'
     */
-    $(document).on("click", ".ps-hasmenu>.ps-link", function (e) {
+    $(document).on("click", ".dh-hasmenu>.dh-link", function (e) {
         e.preventDefault();
 
         const parentEle = $(this).parent();
+        parentEle.find(".dh-submenu .dh-item").show();
         if (parentEle.hasClass("open-menu")) {
-            parentEle.find(".ps-submenu").slideUp();
-            parentEle.find(".ps-arrow").css({
+            parentEle.find(".dh-submenu").slideUp();
+            parentEle.find(".dh-arrow").css({
                 transform: "rotate(0deg)"
             })
         } else {
-            parentEle.find(".ps-submenu").slideDown();
-            parentEle.find(".ps-arrow").css({
+            parentEle.find(".dh-submenu").slideDown();
+            parentEle.find(".dh-arrow").css({
                 transform: "rotate(90deg)"
             })
         }
@@ -45,8 +46,8 @@
     }
 
     $(document).ready(function () {
-        $(document).find(".ps-item").removeClass("active");
-        $(document).find(".ps-hasmenu").removeClass("open-menu active");
+        $(document).find(".dh-item").removeClass("active");
+        $(document).find(".dh-hasmenu").removeClass("open-menu active");
         const pathname = window.location.pathname;
 
         if (pathname) {
@@ -60,11 +61,11 @@
             if (fineEle.length > 0) {
                 fineEle.addClass("active");
 
-                if (fineEle.closest("ul").hasClass("ps-submenu")) {
-                    fineEle.closest(".ps-hasmenu").addClass("open-menu active");
-                    fineEle.closest(".ps-submenu").slideDown();
+                if (fineEle.closest("ul").hasClass("dh-submenu")) {
+                    fineEle.closest(".dh-hasmenu").addClass("open-menu active");
+                    fineEle.closest(".dh-submenu").slideDown();
                 } else {
-                    fineEle.closest(".ps-item").addClass("active");
+                    fineEle.closest(".dh-item").addClass("active");
                 }
 
                 if (!fineEle.isInViewport()) {
@@ -81,11 +82,11 @@
 
 
     /*
-        Toggle 'ps-sidebar-hide' class on click of element with id 'sidebar-hide'
+        Toggle 'dh-sidebar-hide' class on click of element with id 'sidebar-hide'
     */
     $(document).on("click", "#sidebar-hide", function (e) {
         e.preventDefault();
-        $(document.body).toggleClass("ps-sidebar-hide");
+        $(document.body).toggleClass("dh-sidebar-hide");
     })
 
     /*
@@ -93,19 +94,19 @@
     */
     $(document).on("click", "#mobile-collapse", function (e) {
         e.preventDefault();
-        const sidebar = $('.ps-sidebar');
+        const sidebar = $('.dh-sidebar');
         sidebar.toggleClass("mob-sidebar-active");
-        sidebar.find(".ps-menu-overlay").toggleClass("d-none");
+        sidebar.find(".dh-menu-overlay").toggleClass("d-none");
     })
 
     /*
-        Hide mobile sidebar and menu overlay on click of element with class 'ps-menu-overlay'
+        Hide mobile sidebar and menu overlay on click of element with class 'dh-menu-overlay'
     */
-    $(document).on("click", ".ps-menu-overlay", function (e) {
+    $(document).on("click", ".dh-menu-overlay", function (e) {
         e.preventDefault();
-        const sidebar = $('.ps-sidebar');
+        const sidebar = $('.dh-sidebar');
         sidebar.removeClass("mob-sidebar-active");
-        sidebar.find(".ps-menu-overlay").addClass("d-none");
+        sidebar.find(".dh-menu-overlay").addClass("d-none");
     })
 
     $(document).ready(function () {
@@ -280,11 +281,11 @@
         const value = $(this).val().toLowerCase();
         let anyVisibleItem = false;
 
-        $(".ps-navbar .ps-item").hide();
-        $(".ps-navbar .ps-caption").each(function () {
+        $(".dh-navbar .dh-item").hide();
+        $(".dh-navbar .dh-caption").each(function () {
             const headingText = $(this).text().toLowerCase();
             const $heading = $(this);
-            const $items = $heading.nextUntil(".ps-caption");
+            const $items = $heading.nextUntil(".dh-caption");
 
             let hasVisibleItems = false;
 
@@ -478,6 +479,18 @@
 
     initializeTagify();
     $(document).on('formset:added', initializeTagify);
+
+    $(document).on("change", 'input[name=_selected_action], #action-toggle', function(){
+        const selectedCount = $(document).find('input[name=_selected_action]:checked').length;
+        const footerActionEle = $(document).find(".change-list-actions-row");
+        if( footerActionEle.length > 0 ){
+            if( selectedCount > 0 ){
+                footerActionEle.removeClass("hide");
+            }else{
+                footerActionEle.addClass("hide");
+            }
+        }
+    })
 })(jQuery);
 
 

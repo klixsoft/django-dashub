@@ -40,7 +40,7 @@
 
                             <h3 class="{% if not inline_opts.sortable_options or not inline_opts.sortable_options.disabled %} djn-drag-handler{% endif %}">
                                         <span>
-                                            <span>{{ inline_admin_formset.opts.verbose_name|capfirst }}:</span>
+                                            <span class="label">{{ inline_admin_formset.opts.verbose_name|capfirst }} #{{ forloop.counter }}:</span>
                                             <span class="inline_label">
                                                 {% if inline_admin_form.original %}
                                                     {{ inline_admin_form.original }}
@@ -48,10 +48,13 @@
                                                         <a href="{% url inline_admin_form.model_admin.opts|admin_urlname:'change' inline_admin_form.original.pk|admin_urlquote %}"
                                                            class="{% if inline_admin_formset.has_change_permission %}inlinechangelink{% else %}inlineviewlink{% endif %}">
                                                             {% if inline_admin_formset.has_change_permission %}
-                                                                {% trans "Change" %}{% else %}
-                                                                {% trans "View" %}{% endif %}</a>
+                                                                {% trans "Change" %}
+                                                            {% else %}
+                                                                {% trans "View" %}
+                                                            {% endif %}
+                                                        </a>
                                                     {% endif %}
-                                                {% else %}#{{ forloop.counter }}{% endif %}
+                                                {% endif %}
                                             </span>
                                         </span>
                                 {% if inline_admin_form.show_url %}

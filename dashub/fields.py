@@ -5,24 +5,27 @@ from django.contrib.admin import widgets as admin_widgets
 
 
 class TagInputField(models.TextField):
-    """ Custom ModelField that integrates with the Textarea input for tags separated by ::: """
+    """
+    Custom ModelField that stores a string of tags separated by a custom separator,
+    but presents and accepts data as a list in Python.
+    """
 
     def __init__(self, *args, separator=":::", **kwargs):
         self.separator = separator
         super().__init__(*args, **kwargs)
 
     def formfield(self, **kwargs):
-        """ Ensures the correct form field and widget are used """
-        defaults = {"widget": TagInputWidget}
-        defaults.update(kwargs)
+        """Use custom widget for both regular and admin forms"""
+        widget = kwargs.get("widget", TagInputWidget)
 
-        if defaults["widget"] == admin_widgets.AdminTextareaWidget:
-            defaults["widget"] = dashub_widgets.AdminTagInputWidget(separator=self.separator)
+        if widget == admin_widgets.AdminTextareaWidget:
+            widget = dashub_widgets.AdminTagInputWidget(separator=self.separator)
 
-        return super().formfield(**defaults)
+        kwargs["widget"] = widget
+        return super().formfield(**kwargs)
 
     def from_db_value(self, value, expression, connection):
-        if value is None or value.strip() == "":
+        if not value:
             return []
         return value.split(self.separator)
 
@@ -31,10 +34,8 @@ class TagInputField(models.TextField):
             return []
         if isinstance(value, list):
             return value
-        if isinstance(value, str):
-            value = value.strip()
-            return value.split(self.separator) if value else []
-        return []
+        value = value.strip()
+        return value.split(self.separator) if value else []
 
     def get_prep_value(self, value):
         if value is None:
@@ -42,3 +43,12 @@ class TagInputField(models.TextField):
         if isinstance(value, list):
             return self.separator.join(value)
         return value
+
+    def value_to_string(self, obj):
+        value = self.value_from_object(obj)
+        return self.get_prep_value(value)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        kwargs['separator'] = self.separator
+        return name, path, args, kwargs

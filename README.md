@@ -232,6 +232,7 @@ DASHUB_SETTINGS = {
     "site_logo": "/static/logo.svg",
     "site_icon": "/static/favicon.ico",
     "theme_color": "#31aa98",
+    "border_radius": "5px",
     "hide_models": [
         "auth",  # Hides all models in the auth app
         "auth.group"  # Hides the group model in the auth app

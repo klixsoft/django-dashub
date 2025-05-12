@@ -54,7 +54,9 @@
     {% block date_hierarchy %}{% if cl.date_hierarchy %}{% date_hierarchy cl %}{% endif %}{% endblock %}
 
     {% block search %}
-        {% search_form cl %}
+        <div class="search-form">
+            {% search_form cl %}
+        </div>
     {% endblock %}
 
     <div class="col-12">
@@ -73,32 +75,42 @@
                         </div>
                         {{ cl.formset.non_form_errors }}
                     {% endif %}
-                    <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
-                        <div class="row">
-                            <div class="col-12">
-                                {% if cl.formset %}
-                                    <div>{{ cl.formset.management_form }}</div>
-                                {% endif %}
 
-                                {% block result_list %}
-                                    <div class="change-list-actions row pb-3">
-                                        <div class="col-12">
-                                            {% if action_form and actions_on_top and cl.show_admin_actions %}
-                                                {% admin_actions %}
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    {% result_list cl %}
-                                    {% if action_form and actions_on_bottom and cl.show_admin_actions %}
-                                        <div class="row">
-                                            <div class="col-12">
-                                                {% admin_actions %}
+                    <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
+                        {% if cl.result_count > 0 %}
+                            <div class="row">
+                                <div class="col-12">
+                                    {% if cl.formset %}
+                                        <div>{{ cl.formset.management_form }}</div>
+                                    {% endif %}
+
+                                    {% block result_list %}
+                                        <div class="dh-actions hide change-list-actions-row">
+                                            <div class="change-list-actions row">
+                                                <div class="col-12">
+                                                    {% if action_form and actions_on_top and cl.show_admin_actions %}
+                                                        {% admin_actions %}
+                                                    {% endif %}
+                                                </div>
                                             </div>
                                         </div>
-                                    {% endif %}
-                                {% endblock %}
+                                        {% result_list cl %}
+                                        {% if action_form and actions_on_bottom and cl.show_admin_actions %}
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    {% admin_actions %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endblock %}
+                                </div>
                             </div>
-                        </div>
+                        {% else %}
+                            <div class="no_results">
+                                No {{ cl.opts.verbose_name_plural }} Found
+                            </div>
+                        {% endif %}
+
                         <div class="row">
                             {% block pagination %}{% pagination cl %}{% endblock %}
                         </div>
@@ -124,5 +136,5 @@
             {% endfor %}
         }
     </script>
-    <script type="text/javascript" src="{% static 'dashub/js/change_list.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/change_list.js' %}"></script>
 {% endblock %}

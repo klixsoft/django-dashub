@@ -1,5 +1,4 @@
 import copy
-import html
 import itertools
 import json
 import logging
@@ -12,7 +11,7 @@ from django.contrib.admin import ListFilter
 from django.contrib.admin.helpers import AdminForm, Fieldset, InlineAdminFormSet
 from django.contrib.admin.models import LogEntry
 from django.contrib.admin.sites import all_sites
-from django.contrib.admin.views.main import PAGE_VAR, ChangeList
+from django.contrib.admin.views.main import PAGE_VAR, ChangeList, ALL_VAR
 from django.contrib.auth import get_user_model
 from django.contrib.auth.context_processors import PermWrapper
 from django.contrib.auth.models import AbstractUser
@@ -21,7 +20,7 @@ from django.db.models.base import ModelBase
 from django.template import Context, Library
 from django.template.defaultfilters import capfirst
 from django.template.loader import get_template
-from django.templatetags.static import static, StaticNode
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.html import escape, format_html
 from django.utils.safestring import SafeText, mark_safe
@@ -335,7 +334,7 @@ def admin_extra_filters(cl: ChangeList) -> Dict:
 
 
 @register.simple_tag
-def dashub_list_filter(cl: ChangeList, spec: ListFilter) -> SafeText:
+def dashub_list_filter(cl: ChangeList, spec: ListFilter):
     """
     Render out our list filter in a dropdown friendly format, for use by filter.html, see original implementation here
 
@@ -345,39 +344,37 @@ def dashub_list_filter(cl: ChangeList, spec: ListFilter) -> SafeText:
     tpl = get_template(spec.template)
     choices = list(spec.choices(cl))
     field_key = get_filter_id(spec)
-    matched_key = field_key
+    field_name = ""
 
     for choice in choices:
         qs = choice.get("query_string")
         if not qs:
             continue
 
-        value = ""
         matches = {}
         query_parts = urllib.parse.parse_qs(qs[1:])
-        for key in query_parts.keys():
-            if key == field_key:
-                value = query_parts[key][0]
-                matched_key = key
-            elif key.startswith(field_key + "__") or "__" + field_key + "__" in key:
-                value = query_parts[key][0]
-                matched_key = key
-
-            if value:
-                matches[matched_key] = value
+        if f"{field_key}__exact" in query_parts:
+            matches[f"{field_key}__exact"] = query_parts[f"{field_key}__exact"][0]
+        elif field_key in query_parts:
+            matches[field_key] = query_parts[field_key][0]
+        else:
+            for key in query_parts:
+                if key.startswith(field_key + "__") or f"__{field_key}__" in key:
+                    matches[key] = query_parts[key][0]
 
         # Iterate matches, use original as actual values, additional for hidden
-        i = 0
-        if field_key == "country":
-            print(spec)
-            print(field_key, matches.items())
-        for key, value in matches.items():
+        for i, (key, value) in enumerate(matches.items()):
             if i == 0:
                 choice["name"] = key
                 choice["value"] = value
-            i += 1
+                field_name = key
 
-    return tpl.render({"field_name": field_key, "title": spec.title, "choices": choices, "spec": spec})
+    return tpl.render({
+        "field_name": field_name,
+        "title": spec.title,
+        "choices": choices,
+        "spec": spec
+    })
 
 
 @register.simple_tag
@@ -664,3 +661,18 @@ def is_path_image(path: str) -> bool:
     Check if the given path is an image
     """
     return path.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".avif", ".svg", ".webp"))
+
+
+@register.filter
+def class_name(value: Any) -> str:
+    return value.__class__.__name__
+
+
+@register.filter
+def pagination_show_all_url(cl) -> bool:
+    need_show_all_link = cl.can_show_all and not cl.show_all and cl.multi_page
+    return need_show_all_link and cl.get_query_string({ALL_VAR: ""})
+
+
+
+

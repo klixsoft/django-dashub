@@ -23,7 +23,7 @@
           crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.hugeicons.com/font/hgi-stroke-rounded.css">
+    <link rel="stylesheet" href="https://use.hugeicons.com/font/icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}" id="main-style-link">
     <style>
@@ -31,6 +31,7 @@
             --primary: {{ dashub_settings.theme_color }};
             --primary-rgb: {{ dashub_settings.theme_color_rgb }};
             --td-active-bg: {{ dashub_settings.theme_color }};
+            --bs-border-radius: {{ dashub_settings.border_radius }};
         }
     </style>
 
@@ -55,18 +56,18 @@
 
     {% if not is_popup %}
         <!-- [ Header Topbar ] start -->
-        <header class="ps-header">
+        <header class="dh-header">
             <div class="header-wrapper">
-                <div class="me-auto ps-mob-drp">
+                <div class="me-auto dh-mob-drp">
                     <ul class="list-unstyled">
                         <!-- ======= Menu collapse Icon ===== -->
-                        <li class="ps-h-item ps-sidebar-collapse">
-                            <a href="#" class="ps-head-link ms-0" id="sidebar-hide">
+                        <li class="dh-h-item dh-sidebar-collapse">
+                            <a href="#" class="dh-head-link ms-0" id="sidebar-hide">
                                 <i class="hgi hgi-stroke hgi-menu-01"></i>
                             </a>
                         </li>
-                        <li class="ps-h-item ps-sidebar-popup">
-                            <a href="#" class="ps-head-link ms-0" id="mobile-collapse">
+                        <li class="dh-h-item dh-sidebar-popup">
+                            <a href="#" class="dh-head-link ms-0" id="mobile-collapse">
                                 <i class="hgi hgi-stroke hgi-menu-01"></i>
                             </a>
                         </li>
@@ -75,12 +76,12 @@
                 <!-- [Mobile Media Block end] -->
                 <div class="ms-auto">
                     <ul class="list-unstyled">
-                        <li class="dropdown dropdown-user ps-h-item">
-                            <a class="ps-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#"
+                        <li class="dropdown dropdown-user dh-h-item">
+                            <a class="dh-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#"
                                role="button" aria-haspopup="false" data-bs-auto-close="outside" aria-expanded="false">
                                 <img src="{% get_user_avatar request.user %}" alt="user-image" class="user-avatar"/>
                             </a>
-                            <div class="dropdown-menu dropdown-menu-end ps-h-dropdown">
+                            <div class="dropdown-menu dropdown-menu-end dh-h-dropdown">
                                 <div class="dropdown-header px-0 mb-2 d-flex align-items-center justify-content-between">
                                     <h5 class="m-0">Profile</h5>
                                 </div>
@@ -103,7 +104,7 @@
                                         {% for link in user_menu %}
                                             <a href="{{ link.url }}" class="dropdown-item">
                                             <span>
-                                                <i class="ps-icon text-muted me-2 {{ link.icon }}"></i>
+                                                <i class="dh-icon text-muted me-2 {{ link.icon }}"></i>
                                                 <span>{% trans link.name %}</span>
                                             </span>
                                             </a>
@@ -118,7 +119,7 @@
                                         {% endif %}
 
                                         <a href="{% url 'admin:password_change' %}" class="dropdown-item">
-                                            <i class="ps-icon text-muted hgi hgi-stroke hgi-reset-password"></i>
+                                            <i class="dh-icon text-muted hgi hgi-stroke hgi-reset-password"></i>
                                             <span>{% trans 'Change Password' %}</span>
                                         </a>
                                         <hr class="border-secondary border-opacity-50"/>
@@ -126,7 +127,7 @@
                                             <form method="post" action="{% url 'admin:logout' %}">
                                                 {% csrf_token %}
                                                 <button class="btn d-flex align-items-center justify-content-center btn-primary w-100">
-                                                    <i class="hgi hgi-stroke hgi-logout-03 me-2 ps-icon"></i>
+                                                    <i class="hgi hgi-stroke hgi-logout-03 me-2 dh-icon"></i>
                                                     {% translate 'Log out' %}
                                                 </button>
                                             </form>
@@ -145,7 +146,7 @@
             {% get_side_menu as side_menu_list %}
 
             <!-- [ Sidebar Menu ] start -->
-            <nav class="ps-sidebar">
+            <nav class="dh-sidebar">
                 <div class="navbar-wrapper">
                     <div class="m-header">
                         <a href="" class="b-brand text-primary">
@@ -154,7 +155,7 @@
                         </a>
                     </div>
                     <div class="navbar-content">
-                        <div class="card ps-user-card">
+                        <div class="card dh-user-card">
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
                                     <div class="flex-shrink-0">
@@ -174,49 +175,49 @@
                             <input type="text" class="form-control" placeholder="Search...">
                         </form>
 
-                        <ul class="ps-navbar">
+                        <ul class="dh-navbar">
                             {% for app in side_menu_list %}
-                                <li class="ps-item ps-caption">
+                                <li class="dh-item dh-caption">
                                     <label>{{ app.name }}</label>
                                 </li>
                                 {% for model in app.models %}
                                     {% if model.submenu %}
-                                        <li class="ps-item ps-hasmenu">
-                                            <a href="#!" class="ps-link">
+                                        <li class="dh-item dh-hasmenu">
+                                            <a href="#!" class="dh-link">
                                                 <span>
-                                                    <span class="ps-micon">
+                                                    <span class="dh-micon">
                                                         <i class="{{ model.icon }}"></i>
                                                     </span>
-                                                    <span class="ps-mtext">{{ model.name }}</span>
+                                                    <span class="dh-mtext">{{ model.name }}</span>
                                                 </span>
-                                                <span class="ps-arrow">
+                                                <span class="dh-arrow">
                                                     <i class="hgi hgi-stroke hgi-arrow-right-01"></i>
                                                 </span>
                                             </a>
 
-                                            <ul class="ps-submenu" style="display: none;">
+                                            <ul class="dh-submenu" style="display: none;">
                                                 {% for submenu in model.submenu %}
-                                                    <li class="ps-item"><a class="ps-link"
+                                                    <li class="dh-item"><a class="dh-link"
                                                                            href="{{ submenu.url }}">{{ submenu.name }}</a>
                                                     </li>
                                                 {% endfor %}
                                             </ul>
                                         </li>
                                     {% else %}
-                                        <li class="ps-item">
+                                        <li class="dh-item">
                                             {% if model.url %}
-                                                <a href="{{ model.url }}" class="ps-link">
-                                                        <span class="ps-micon">
+                                                <a href="{{ model.url }}" class="dh-link">
+                                                        <span class="dh-micon">
                                                             <i class="nav-icon {{ model.icon }}"></i>
                                                         </span>
-                                                    <span class="ps-mtext">{{ model.name }}</span>
+                                                    <span class="dh-mtext">{{ model.name }}</span>
                                                 </a>
                                             {% else %}
-                                                <span class="ps-link disabled">
-                                                        <span class="ps-micon">
+                                                <span class="dh-link disabled">
+                                                        <span class="dh-micon">
                                                             <i class="nav-icon {{ model.icon }}"></i>
                                                         </span>
-                                                        <span class="ps-mtext">{{ model.name }}</span>
+                                                        <span class="dh-mtext">{{ model.name }}</span>
                                                     </span>
                                             {% endif %}
                                         </li>
@@ -227,14 +228,14 @@
                     </div>
                 </div>
 
-                <div class="ps-menu-overlay d-none"></div>
+                <div class="dh-menu-overlay d-none"></div>
             </nav>
             <!-- [ Sidebar Menu ] end -->
         {% endblock %}
     {% endif %}
 
-    <div class="content-wrapper ps-container" {% if is_popup %}style="margin-left:0px; padding-top: 20px;"{% endif %}>
-        <div class="ps-content">
+    <div class="content-wrapper dh-container" {% if is_popup %}style="margin-left:0px; padding-top: 20px;"{% endif %}>
+        <div class="dh-content">
             {% block page_content %}
                 {% if not is_popup %}
                     <!-- [ breadcrumb ] start -->
@@ -302,28 +303,13 @@
         </div>
     </div>
 
-    {% block footer %}
-        {% if not is_popup %}
-            <!-- [ Footer ] start -->
-            <footer class="ps-footer">
-                <div class="footer-wrapper container-fluid">
-                    <div class="row">
-                        <div class="col my-1">
-                            <p class="m-0">Copyright &copy; 2023 | All Right Reserved</p>
-                        </div>
-                        <div class="col-auto my-1">
-                            <ul class="list-inline footer-link mb-0">
-                                <li class="list-inline-item"><a href="">Home</a></li>
-                                <li class="list-inline-item"><a href="" target="_blank">Documentation</a></li>
-                                <li class="list-inline-item"><a href="" target="_blank">Support</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </footer>
-            <!-- [ Footer ] end -->
-        {% endif %}
-    {% endblock %}
+    <!-- [ Footer ] start -->
+    <footer class="dh-footer">
+        <div class="footer-wrapper container-fluid">
+            {% block footer %}{% endblock %}
+        </div>
+    </footer>
+    <!-- [ Footer ] end -->
 
 </div>
 

@@ -61,16 +61,17 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "changeform_format_overrides": {},
     # Add a language dropdown into the admin
     "language_chooser": False,
-    "theme_color": "#e31837",
     "model_submenus": {},
     "related_modal_active": True,
     "use_compressed_assets": False,
+
+    # Styles
+    "theme_color": "#e31837",
+    "border_radius": "4px"
 }
 
 CHANGEFORM_TEMPLATES = {
     "single": "dashub/includes/single.html",
-    "carousel": "dashub/includes/carousel.html",
-    "collapsible": "dashub/includes/collapsible.html",
     "horizontal_tabs": "dashub/includes/horizontal_tabs.html",
     "vertical_tabs": "dashub/includes/vertical_tabs.html",
 }

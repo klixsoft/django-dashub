@@ -1,42 +1,78 @@
 {% load i18n static admin_list dashub %}
 
-<div class="col-12 pb-4" id="change-list-filters">
-    <form id="changelist-search" class="form-inline" method="GET">
-        {% block filters %}
-            {% if cl.has_filters %}
-                {% for spec in cl.filter_specs %}{% dashub_list_filter cl spec %}{% endfor %}
+<div class="col-12 pb-3" id="change-list-filters">
+    <form id="changelist-search" class="form-inline justify-content-between" method="GET">
+        <div>
+            {% if cl.search_fields %}
+                <div class="form-group position-relative search-form-input">
+                    <input class="form-control" type="text" name="{{ search_var }}" value="{{ cl.query }}"
+                           id="searchbar"
+                           placeholder="{% if cl.search_help_text %}{{ cl.search_help_text }}{% else %}{% trans 'Type to Search' %}{% endif %}">
+                    <i class="hgi hgi-stroke hgi-search-01"></i>
+                </div>
             {% endif %}
-        {% endblock %}
 
-
-        {% if cl.search_fields %}
-            <div class="form-group">
-                <input class="form-control" type="text" name="{{ search_var }}" value="{{ cl.query }}" id="searchbar"
-                    {% if cl.search_help_text %} placeholder="{{ cl.search_help_text }}{% endif %}">
-            </div>
-        {% endif %}
-
-        {% if cl.has_filters or cl.search_fields %}
-            <div class="form-group" id="search_group">
-                <button type="submit" class="btn btn-primary">{% trans 'Search' %}</button>
-                {% if show_result_count %}
-                    <span class="small quiet">
-                        {% blocktrans count counter=cl.result_count %}{{ counter }} result{% plural %}{{ counter }} results{% endblocktrans %}
+            {% if cl.has_filters or cl.search_fields %}
+                <div class="form-group" id="search_group">
+                    {% if show_result_count %}
+                        <span class="small quiet">
+                        {% blocktrans count counter=cl.result_count %}{{ counter }} result{% plural %}{{ counter }}
+                            results{% endblocktrans %}
                         (<a href="?{% if cl.is_popup %}_popup=1{% endif %}">
                             {% if cl.show_full_result_count %}
-                                {% blocktrans with full_result_count=cl.full_result_count %}{{ full_result_count }} total{% endblocktrans %}
+                                {% blocktrans with full_result_count=cl.full_result_count %}{{ full_result_count }}
+                                    total{% endblocktrans %}
                             {% else %}
                                 {% trans "Show all" %}
                             {% endif %}
                         </a>)
                     </span>
-                {% endif %}
-                {% admin_extra_filters cl as extra_filters %}
-                {% for pair in extra_filters.items %}
-                    {% if pair.0 != search_var %}<input type="hidden" name="{{ pair.0 }}" value="{{ pair.1 }}">{% endif %}
-                {% endfor %}
+                    {% endif %}
+                    {% admin_extra_filters cl as extra_filters %}
+                    {% for pair in extra_filters.items %}
+                        {% if pair.0 != search_var %}<input type="hidden" name="{{ pair.0 }}" value="{{ pair.1 }}">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        {% if cl.has_filters %}
+            <div class="form-group text-end">
+                {% with show_all_url=cl|pagination_show_all_url %}
+                    {% if show_all_url %}&nbsp;&nbsp;
+                        <a type="button" href="{{ show_all_url }}" class="btn btn-sm btn-outline-secondary filter-button me-2">
+                            <i class="hgi hgi-stroke hgi-left-to-right-list-dash"></i>
+                            {% trans 'Show all' %}
+                        </a>
+                    {% endif %}
+                {% endwith %}
+
+                <button class="btn btn-outline-secondary filter-button" type="button" data-bs-toggle="offcanvas"
+                        data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">
+                    <i class="hgi hgi-stroke hgi-filter"></i>
+                    {% trans 'Filters' %}
+                </button>
             </div>
         {% endif %}
+    </form>
 
+    <form class="offcanvas offcanvas-end" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            {% block filters %}
+                {% if cl.has_filters %}
+                    {% for spec in cl.filter_specs %}{% dashub_list_filter cl spec %}{% endfor %}
+                {% endif %}
+            {% endblock %}
+        </div>
+
+        <div class="offcanvas-footer">
+            <button type="submit" class="btn btn-primary">Apply Filter</button>
+            <a href="" class="btn btn-outline-primary mt-2">Clear All Filter</a>
+        </div>
     </form>
 </div>

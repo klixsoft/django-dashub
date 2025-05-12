@@ -21,7 +21,9 @@
     {% block breadcrumbs %}
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a></li>
+            <li class="breadcrumb-item"><a
+                    href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+            </li>
             <li class="breadcrumb-item">
                 {% if has_view_permission %}
                     <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
@@ -42,10 +44,26 @@
 
 {% block content_title %} {{ opts.verbose_name_plural|capfirst }} {% endblock %}
 
+{% block page_actions %}
+    {% block object-tools %}
+        {% if change %}
+            {% if not is_popup %}
+                <div class="object-tools">
+                    {% block object-tools-items %}
+                        {% change_form_object_tools %}
+                        {% block extra_actions %}{% endblock %}
+                    {% endblock %}
+                </div>
+            {% endif %}
+        {% endif %}
+    {% endblock %}
+{% endblock %}
+
 {% block content %}
 
     <div id="content-main" class="col-12">
-        <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.model_name }}_form" novalidate>
+        <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post"
+              id="{{ opts.model_name }}_form" novalidate>
             {% csrf_token %}
             {% block form_top %}{% endblock %}
 
@@ -86,31 +104,19 @@
 
                 {% block after_related_objects %}{% endblock %}
 
-                <div class="col-12 col-lg-12">
-                    <div id="practet-actions" class="{{ dashub_ui.actions_classes }}">
-                        {% block submit_buttons_bottom %}
-                            {% submit_row %}
-                            {% block object-tools %}
-                                {% if change %}
-                                    {% if not is_popup %}
-                                        <div class="object-tools">
-                                            {% block object-tools-items %}
-                                                {% change_form_object_tools %}
-                                                {% block extra_actions %}{% endblock %}
-                                            {% endblock %}
-                                        </div>
-                                    {% endif %}
-                                {% endif %}
-                            {% endblock %}
-                        {% endblock %}
-                    </div>
-                </div>
-
                 {% block admin_change_form_document_ready %}
-                    <script type="text/javascript" id="django-admin-form-add-constants" src="{% static 'admin/js/change_form.js' %}" {% if adminform and add %}data-model-name="{{ opts.model_name }}"{% endif %}></script>
+                    <script type="text/javascript" id="django-admin-form-add-constants"
+                            src="{% static 'admin/js/change_form.js' %}"
+                            {% if adminform and add %}data-model-name="{{ opts.model_name }}"{% endif %}></script>
                 {% endblock %}
 
                 {% prepopulated_fields_js %}
+            </div>
+
+            <div id="practet-actions" class="{{ dashub_ui.actions_classes }} dh-actions">
+                {% block submit_buttons_bottom %}
+                    {% submit_row %}
+                {% endblock %}
             </div>
         </form>
     </div>
@@ -118,11 +124,13 @@
 {% endblock %}
 
 {% block extrajs %}
-    {{  block.super }}
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    {{ block.super }}
+    <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script type="text/javascript" src="{% static 'assets/js/change_form.js' %}"></script>
     {% if dashub_settings.related_modal_active %}
-    <script type="text/javascript" src="{% static 'assets/plugins/bootstrap-show-modal/bootstrap-show-modal.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'assets/js/related-modal.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'assets/plugins/bootstrap-show-modal/bootstrap-show-modal.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'assets/js/related-modal.js' %}"></script>
     {% endif %}
 {% endblock %}

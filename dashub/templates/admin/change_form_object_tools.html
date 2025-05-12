@@ -2,8 +2,24 @@
 
 {% block object-tools-items %}
     {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
-    <a class="btn btn-block btn-secondary btn-sm" href="{% add_preserved_filters history_url %}">{% trans 'History' %}</a>
+    <button class="btn btn-block btn-outline-secondary btn-sm btn-with-icon" data-bs-toggle="offcanvas" data-bs-target="#modalHistory" aria-controls="modalHistory">
+        <i class="hgi hgi-stroke hgi-transaction-history"></i>
+        {% trans 'History' %}
+    </button>
     {% if has_absolute_url %}
-        <a href="{{ absolute_url }}" class="btn btn-block btn-secondary btn-sm">{% trans "View on site" %}</a>
+        <a href="{{ absolute_url }}" class="btn btn-block btn-outline-secondary btn-with-icon btn-sm">
+            <i class="hgi hgi-stroke hgi-link-square-02"></i>
+            {% trans "View on site" %}
+        </a>
     {% endif %}
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="modalHistory" aria-labelledby="modalHistoryLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="modalHistoryLabel">History</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <iframe src="{% add_preserved_filters history_url %}"></iframe>
+        </div>
+    </div>
 {% endblock %}

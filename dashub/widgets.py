@@ -1,9 +1,5 @@
-import json
-
 from django import forms
 from django.forms.widgets import Select, SelectMultiple
-from django.template.loader import render_to_string
-from django.utils.safestring import mark_safe
 from django.contrib.admin import widgets as admin_widgets
 
 
@@ -64,3 +60,5 @@ class TagInputWidget(forms.Textarea):
 
 class AdminTagInputWidget(TagInputWidget, admin_widgets.AdminTextareaWidget):
     pass
+
+
