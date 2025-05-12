@@ -2,6 +2,7 @@ include LICENSE
 include AUTHORS
 include README.md
 recursive-include dashub/templates *
+recursive-include dashub/contrib *
 recursive-include dashub/static *
 recursive-include dashub/templatetags *
 recursive-include dashub/migrations *
