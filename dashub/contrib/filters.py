@@ -12,7 +12,7 @@ from dashub.contrib.mixins import ValueMixin, ChoicesMixin, MultiValueMixin
 
 
 class RadioFilter(admin.SimpleListFilter):
-    template = "unfold/filters/filters_field.html"
+    template = "dashub/filters/filters_field.html"
     form_class = RadioForm
     all_option = ["", _("All")]
 
@@ -104,7 +104,7 @@ class BooleanRadioFilter(ValueMixin, admin.BooleanFieldListFilter):
 
 
 class RelatedCheckboxFilter(MultiValueMixin, admin.RelatedFieldListFilter):
-    template = "unfold/filters/filters_field.html"
+    template = "dashub/filters/filters_field.html"
     form_class = CheckboxForm
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:

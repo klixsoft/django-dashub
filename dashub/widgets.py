@@ -86,5 +86,5 @@ class DashubAdminRadioSelectWidget(AdminRadioSelect):
 
 class DashubAdminCheckboxSelectMultiple(CheckboxSelectMultiple):
     template_name = "dashub/widgets/radio.html"
-    option_template_name = "unfold/widgets/radio_option.html"
+    option_template_name = "dashub/widgets/radio_option.html"
 
