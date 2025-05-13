@@ -57,22 +57,5 @@
         {% endif %}
     </form>
 
-    <form class="offcanvas offcanvas-end" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            {% block filters %}
-                {% if cl.has_filters %}
-                    {% for spec in cl.filter_specs %}{% dashub_list_filter cl spec %}{% endfor %}
-                {% endif %}
-            {% endblock %}
-        </div>
-
-        <div class="offcanvas-footer">
-            <button type="submit" class="btn btn-primary">Apply Filter</button>
-            <a href="" class="btn btn-outline-primary mt-2">Clear All Filter</a>
-        </div>
-    </form>
+    {% include "dashub/helpers/change_list_filter.html" %}
 </div>

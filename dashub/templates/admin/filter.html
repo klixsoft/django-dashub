@@ -1,32 +1,6 @@
 {% load dashub %}
 {% load i18n %}
 
-<style>
-    #filtersOffcanvas .form-group h5 {
-        font-weight: 500;
-        font-size: 17px;
-        margin-bottom: 16px;
-        text-transform: capitalize;
-    }
-
-    #filtersOffcanvas .form-group {
-        margin-bottom: 1rem;
-    }
-
-    #filtersOffcanvas .offcanvas-footer {
-        padding: 10px;
-        border-top: 1px dashed var(--dh-sidebar-border-color);
-    }
-
-    #filtersOffcanvas .offcanvas-header {
-        border-bottom: 1px dashed var(--dh-sidebar-border-color);
-    }
-
-    #filtersOffcanvas .offcanvas-footer .btn {
-        width: 100%;
-    }
-</style>
-
 <div class="form-group">
     <h5>{% blocktranslate with filter_title=title %} By {{ filter_title }} {% endblocktranslate %}</h5>
 

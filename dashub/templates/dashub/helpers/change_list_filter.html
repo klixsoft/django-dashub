@@ -1,0 +1,41 @@
+{% load admin_urls %}
+{% load i18n admin_list dashub %}
+
+{% if cl.model_admin.list_filter_submit %}
+    <form method="get" class="offcanvas offcanvas-end" tabindex="-1" id="filtersOffcanvas"
+          aria-labelledby="filtersOffcanvasLabel">
+{% else %}
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel">
+{% endif %}
+
+<div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="filtersOffcanvasLabel">{% trans "Filter" %}</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{% trans "Close" %}"></button>
+</div>
+
+<div class="offcanvas-body">
+    {% if cl.model_admin.list_filter_submit %}
+        {% preserve_filters %}
+    {% endif %}
+
+    {% for spec in cl.filter_specs %}
+        {% admin_list_filter cl spec %}
+    {% endfor %}
+</div>
+
+<div class="offcanvas-footer">
+    {% if cl.model_admin.list_filter_submit %}
+        <button type="submit" class="btn btn-primary btn-with-icon">
+            <i class="hgi hgi-stroke hgi-filter"></i> {% trans "Apply Filter" %}
+        </button>
+    {% endif %}
+    <a href="{% url cl.opts|admin_urlname:'changelist' %}" class="btn btn-outline-secondary btn-with-icon mt-2">
+        <i class="hgi hgi-stroke hgi-cancel-circle"></i> {% trans "Clear All Filter" %}
+    </a>
+</div>
+
+{% if cl.model_admin.list_filter_submit %}
+    </form>
+{% else %}
+    </div>
+{% endif %}

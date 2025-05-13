@@ -1,6 +1,9 @@
+from typing import Optional, Any
+
 from django import forms
-from django.forms.widgets import Select, SelectMultiple
-from django.contrib.admin import widgets as admin_widgets
+from django.contrib.admin.widgets import AdminRadioSelect
+from django.forms.widgets import Select, SelectMultiple, CheckboxSelectMultiple
+from django.contrib.admin import widgets as admin_widgets, VERTICAL
 
 
 class DashubSelect(Select):
@@ -61,4 +64,27 @@ class TagInputWidget(forms.Textarea):
 class AdminTagInputWidget(TagInputWidget, admin_widgets.AdminTextareaWidget):
     pass
 
+
+class DashubAdminRadioSelectWidget(AdminRadioSelect):
+    template_name = "dashub/widgets/radio.html"
+    option_template_name = "dashub/widgets/radio_option.html"
+    RADIO_CLASSES = ["form-check-input"]
+
+    def __init__(self, radio_style: Optional[int] = None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if radio_style is None:
+            radio_style = VERTICAL
+        self.radio_style = radio_style
+        self.attrs["class"] = " ".join([*self.RADIO_CLASSES, self.attrs.get("class", "")])
+
+    def get_context(self, *args, **kwargs) -> dict[str, Any]:
+        context = super().get_context(*args, **kwargs)
+        context.update({"radio_style": self.radio_style})
+        return context
+
+
+class DashubAdminCheckboxSelectMultiple(CheckboxSelectMultiple):
+    template_name = "dashub/widgets/radio.html"
+    option_template_name = "unfold/widgets/radio_option.html"
 

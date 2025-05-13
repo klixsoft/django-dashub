@@ -1,0 +1,19 @@
+{% load dashub %}
+
+{% if field.field.widget.input_type == "checkbox" and field.field.widget|class_name != "DashubAdminCheckboxSelectMultiple"%}
+    <div class="{% if field.errors %}errors {% endif %} form-group">
+        <div class="flex flex-row gap-2 items-center">
+            {{ field }}
+            {% include "dashub/helpers/form_label.html" with field=field %}
+        </div>
+        {% include "dashub/helpers/form_errors.html" with errors=field.errors %}
+        {% include "dashub/helpers/help_text.html" with help_text=field.help_text %}
+    </div>
+{% else %}
+    <div class="{% if field.errors %}errors {% endif %}form-group">
+        {% include "dashub/helpers/form_label.html" with field=field %}
+        {{ field }}
+        {% include "dashub/helpers/form_errors.html" with errors=field.errors %}
+        {% include "dashub/helpers/help_text.html" with help_text=field.help_text %}
+    </div>
+{% endif %}

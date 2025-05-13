@@ -17,6 +17,7 @@ from django.contrib.auth.context_processors import PermWrapper
 from django.contrib.auth.models import AbstractUser
 from django.core.handlers.wsgi import WSGIRequest
 from django.db.models.base import ModelBase
+from django.http import HttpRequest
 from django.template import Context, Library
 from django.template.defaultfilters import capfirst
 from django.template.loader import get_template
@@ -672,6 +673,32 @@ def class_name(value: Any) -> str:
 def pagination_show_all_url(cl) -> bool:
     need_show_all_link = cl.can_show_all and not cl.show_all and cl.multi_page
     return need_show_all_link and cl.get_query_string({ALL_VAR: ""})
+
+
+@register.inclusion_tag(
+    "dashub/templatetags/preserve_changelist_filters.html",
+    takes_context=True,
+    name="preserve_filters",
+)
+def preserve_changelist_filters(context: Context) -> dict[str, dict[str, str]]:
+    """
+    Generate hidden input fields to preserve filters for POST forms.
+    """
+    request: Optional[HttpRequest] = context.get("request")
+    changelist: Optional[ChangeList] = context.get("cl")
+
+    if not request or not changelist:
+        return {"params": {}}
+
+    used_params: set[str] = {
+        param for spec in changelist.filter_specs for param in spec.used_parameters
+    }
+    preserved_params: dict[str, str] = {
+        param: value for param, value in request.GET.items() if param not in used_params
+    }
+
+    return {"params": preserved_params}
+
 
 
 
