@@ -467,6 +467,11 @@ b {
         left: 0
     }
 
+    body .dh-actions,
+    body .dh-header{
+        left: 280px;
+    }
+
     .dh-sidebar-hide .dh-sidebar ~ .dh-container,
     .dh-sidebar-hide .dh-sidebar ~ .dh-footer {
         margin-left: 0
@@ -514,7 +519,7 @@ b {
     -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
     position: fixed;
-    left: 280px;
+    left: 0;
     right: 0;
     z-index: 1025;
     display: flex;
@@ -529,7 +534,7 @@ b {
     bottom: 0;
     min-height: 60px;
     border-top: 1px dashed var(--dh-sidebar-border-color);
-    padding: 10px 10px 10px 25px;
+    padding: 10px 25px 10px 25px;
     transition: 0.2s all;
 }
 
@@ -2239,12 +2244,6 @@ ul {
     overflow: hidden scroll;
 }
 
-.select2-container .select2-selection--single,
-.select2-container--default .select2-selection--single .select2-selection__arrow,
-.select2-container .select2-selection--multiple {
-    height: 46px;
-}
-
 .select2-container--default .select2-selection--single .select2-selection__arrow {
     width: 30px;
 }
@@ -3704,10 +3703,14 @@ body .djn-group-nested .djn-items .inline-related {
     font-weight: normal;
 }
 
-.grp-predelete h3,
-.grp-predelete .djn-delete-handler label {
+.grp-predelete{
     text-decoration: line-through;
     opacity: 50%;
+}
+
+.grp-predelete .djn-delete-handler label,
+.grp-predelete .djn-delete-handler{
+    cursor: pointer;
 }
 
 .djn-delete-handler input[type=checkbox] {
@@ -3802,7 +3805,7 @@ body .select2-container .select2-selection--single .select2-selection__rendered,
 .select2-container .select2-selection--single,
 .select2-container--default .select2-selection--single .select2-selection__arrow,
 .select2-container .select2-selection--multiple {
-    height: 46px !important;
+    min-height: 46px !important;
 }
 
 body .select2-container--admin-autocomplete .select2-selection--single .select2-selection__rendered {
@@ -4104,6 +4107,15 @@ body .offcanvas {
 
 #filtersOffcanvas .form-group {
     margin-bottom: 1.5rem;
+}
+
+#filtersOffcanvas .daterange .d-flex,
+#filtersOffcanvas .datetime{
+    gap:10px;
+}
+
+#filtersOffcanvas .datetime .form-group{
+    margin-bottom:10px;
 }
 
 #filtersOffcanvas .offcanvas-footer {

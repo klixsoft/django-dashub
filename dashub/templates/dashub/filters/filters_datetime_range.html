@@ -1,0 +1,13 @@
+{% load i18n %}
+
+{% with choices.0 as choice %}
+    <div class="form-group">
+        <label class="form_label">{% blocktranslate with filter_title=title %} By
+            {{ filter_title }} {% endblocktranslate %}</label>
+
+        {% for field in choice.form %}
+            {{ field }}
+            {% include "dashub/helpers/form_errors.html" with errors=field.errors %}
+        {% endfor %}
+    </div>
+{% endwith %}

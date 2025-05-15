@@ -3,7 +3,7 @@
 
 {% block extrastyle %}
     {{ block.super }}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/autocomplete.css" %}" />
 
     {% if cl.formset or action_form %}
         <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
@@ -125,8 +125,6 @@
 
 {% block extrajs %}
     {{ block.super }}
-    <script type="text/javascript"
-            src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         {% comment %} set filterInputLength default and custom values {% endcomment %}
         window.filterInputLengthDefault = 0;

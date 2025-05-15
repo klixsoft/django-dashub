@@ -1,9 +1,10 @@
 from typing import Optional, Any
 
 from django import forms
-from django.contrib.admin.widgets import AdminRadioSelect
-from django.forms.widgets import Select, SelectMultiple, CheckboxSelectMultiple
+from django.contrib.admin.widgets import AdminRadioSelect, AdminSplitDateTime, AdminDateWidget, AdminTimeWidget
+from django.forms.widgets import Select, SelectMultiple, CheckboxSelectMultiple, MultiWidget
 from django.contrib.admin import widgets as admin_widgets, VERTICAL
+from django.utils.translation import gettext_lazy as _
 
 
 class DashubSelect(Select):
@@ -87,4 +88,90 @@ class DashubAdminRadioSelectWidget(AdminRadioSelect):
 class DashubAdminCheckboxSelectMultiple(CheckboxSelectMultiple):
     template_name = "dashub/widgets/radio.html"
     option_template_name = "dashub/widgets/radio_option.html"
+    CHECKBOX_CLASSES = ["form-check-input"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attrs["class"] = " ".join([*self.CHECKBOX_CLASSES, self.attrs.get("class", "")])
+
+
+class DashubAdminDateWidget(AdminDateWidget):
+    template_name = "dashub/widgets/date.html"
+    DATETIME_CLASSES = ["form-control"]
+
+    def __init__(
+        self, attrs: Optional[dict[str, Any]] = None, format: Optional[str] = None
+    ) -> None:
+        attrs = {
+            **(attrs or {}),
+            "class": " ".join(
+                [
+                    "vDateField",
+                    *self.DATETIME_CLASSES,
+                    attrs.get("class", "") if attrs else "",
+                ]
+            ),
+            "size": "10",
+        }
+        super().__init__(attrs=attrs, format=format)
+
+
+class DashubAdminTimeWidget(AdminTimeWidget):
+    template_name = "dashub/widgets/time.html"
+    DATETIME_CLASSES = ["form-control"]
+
+    def __init__(
+        self, attrs: Optional[dict[str, Any]] = None, format: Optional[str] = None
+    ) -> None:
+        attrs = {
+            **(attrs or {}),
+            "class": " ".join(
+                [
+                    "vTimeField",
+                    *self.DATETIME_CLASSES,
+                    attrs.get("class", "") if attrs else "",
+                ]
+            ),
+            "size": "8",
+        }
+        super().__init__(attrs=attrs, format=format)
+
+
+class DashubAdminSplitDateTimeVerticalWidget(AdminSplitDateTime):
+    template_name = "dashub/widgets/split_datetime_vertical.html"
+
+    def __init__(
+        self,
+        attrs: Optional[dict[str, Any]] = None,
+        date_attrs: Optional[dict[str, Any]] = None,
+        time_attrs: Optional[dict[str, Any]] = None,
+        date_label: Optional[str] = None,
+        time_label: Optional[str] = None,
+    ) -> None:
+        self.date_label = date_label
+        self.time_label = time_label
+
+        widgets = [
+            DashubAdminDateWidget(attrs=date_attrs),
+            DashubAdminTimeWidget(attrs=time_attrs),
+        ]
+        MultiWidget.__init__(self, widgets, attrs)
+
+    def get_context(
+        self, name: str, value: Any, attrs: Optional[dict[str, Any]]
+    ) -> dict[str, Any]:
+        context = super().get_context(name, value, attrs)
+
+        if self.date_label is not None:
+            context["date_label"] = self.date_label
+        else:
+            context["date_label"] = _("Date")
+
+        if self.time_label is not None:
+            context["time_label"] = self.time_label
+        else:
+            context["time_label"] = _("Time")
+
+        return context
+
 

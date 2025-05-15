@@ -1,8 +1,10 @@
+import datetime
 import logging
-from typing import Any, Callable, Dict, List, Set, Union
+from typing import Any, Callable, Dict, List, Set, Union, Optional
 from urllib.parse import urlencode
 
 from django.apps import apps
+from django.conf import settings
 from django.contrib.admin import ListFilter
 from django.contrib.admin.helpers import AdminForm
 from django.contrib.auth.models import AbstractUser
@@ -338,4 +340,25 @@ def hex_to_rgb(hex_color):
 
     r, g, b = (int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
     return f"{r}, {g}, {b}"
+
+
+
+def parse_date_str(value: str) -> Optional[datetime.date]:
+    for date_format in settings.DATE_INPUT_FORMATS:
+        try:
+            return datetime.datetime.strptime(value, date_format).date()
+        except (ValueError, TypeError):
+            continue
+    return None
+
+
+def parse_datetime_str(value: str) -> Optional[datetime.datetime]:
+    for date_format in settings.DATETIME_INPUT_FORMATS:
+        try:
+            return datetime.datetime.strptime(value, date_format)
+        except (ValueError, TypeError):
+            continue
+    return None
+
+
 

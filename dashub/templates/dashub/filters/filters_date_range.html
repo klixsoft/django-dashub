@@ -1,0 +1,17 @@
+{% load i18n %}
+
+{% with choices.0 as choice %}
+    <div class="form-group daterange">
+        <label class="form_label">{% blocktranslate with filter_title=title %} By
+            {{ filter_title }} {% endblocktranslate %}</label>
+
+        <div class="d-flex justify-content-between">
+            {% for field in choice.form %}
+                <div class="flex-fill">
+                    {{ field }}
+                    {% include "dashub/helpers/form_errors.html" with errors=field.errors %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endwith %}

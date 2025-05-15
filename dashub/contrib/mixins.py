@@ -1,8 +1,13 @@
 from typing import Optional, Generator, Any
 
+from django.contrib.admin import ModelAdmin
 from django.contrib.admin.views.main import ChangeList
 from django.core.validators import EMPTY_VALUES
+from django.db.models import QuerySet
+from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
+from django.db.models.fields import BLANK_CHOICE_DASH, Field
+from dashub.contrib.forms import DropdownForm, AutocompleteDropdownForm
 
 
 class ValueMixin:
@@ -50,4 +55,46 @@ class ChoicesMixin:
                 data={self.lookup_kwarg: self.value()},
             ),
         }
+
+
+class DropdownMixin:
+    template = "dashub/filters/filters_field.html"
+    form_class = DropdownForm
+    all_option = ["", _("All")]
+
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
+        if self.value() not in EMPTY_VALUES:
+            return super().queryset(request, queryset)
+
+        return queryset
+
+
+
+class AutocompleteMixin:
+    def has_output(self) -> bool:
+        return True
+
+    def field_choices(
+        self, field: Field, request: HttpRequest, model_admin: ModelAdmin
+    ) -> list[tuple[str, list[tuple[str, str]]]]:
+        return [
+            ("", BLANK_CHOICE_DASH),
+        ]
+
+    def choices(
+        self, changelist: ChangeList
+    ) -> Generator[dict[str, AutocompleteDropdownForm], None, None]:
+        yield {
+            "form": self.form_class(
+                request=self.request,
+                label=_(" By %(filter_title)s ") % {"filter_title": self.title},
+                name=self.lookup_kwarg,
+                choices=(),
+                field=self.field,
+                model_admin=self.model_admin,
+                data={self.lookup_kwarg: self.value()},
+                multiple=self.multiple if hasattr(self, "multiple") else False,
+            ),
+        }
+
 

@@ -1,0 +1,21 @@
+<div class="datetime d-flex w-100 flex-row flex-wrap justify-between">
+    <div class="form-group flex-fill">
+        {% if date_label %}
+            <label class="form-label">{{ date_label }}</label>
+        {% endif %}
+
+        {% with widget=widget.subwidgets.0 %}
+            {% include widget.template_name %}
+        {% endwith %}
+    </div>
+
+    <div class="form-group flex-fill">
+        {% if time_label %}
+            <label class="form-label">{{ time_label }}</label>
+        {% endif %}
+
+        {% with widget=widget.subwidgets.1 %}
+            {% include widget.template_name %}
+        {% endwith %}
+    </div>
+</div>

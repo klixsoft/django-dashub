@@ -37,24 +37,26 @@
             {% endif %}
         </div>
 
-        {% if cl.has_filters %}
-            <div class="form-group text-end">
-                {% with show_all_url=cl|pagination_show_all_url %}
-                    {% if show_all_url %}&nbsp;&nbsp;
-                        <a type="button" href="{{ show_all_url }}" class="btn btn-sm btn-outline-secondary filter-button me-2">
-                            <i class="hgi hgi-stroke hgi-left-to-right-list-dash"></i>
-                            {% trans 'Show all' %}
-                        </a>
-                    {% endif %}
-                {% endwith %}
 
+        <div class="form-group text-end">
+            {% with show_all_url=cl|pagination_show_all_url %}
+                {% if show_all_url %}&nbsp;&nbsp;
+                    <a type="button" href="{{ show_all_url }}"
+                       class="btn btn-sm btn-outline-secondary filter-button me-2">
+                        <i class="hgi hgi-stroke hgi-left-to-right-list-dash"></i>
+                        {% trans 'Show all' %}
+                    </a>
+                {% endif %}
+            {% endwith %}
+
+            {% if cl.has_filters %}
                 <button class="btn btn-outline-secondary filter-button" type="button" data-bs-toggle="offcanvas"
                         data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">
                     <i class="hgi hgi-stroke hgi-filter"></i>
                     {% trans 'Filters' %}
                 </button>
-            </div>
-        {% endif %}
+            {% endif %}
+        </div>
     </form>
 
     {% include "dashub/helpers/change_list_filter.html" %}
