@@ -25,6 +25,7 @@ setup(
         "django_dashub": [
             "templates/*",
             "static/*",
+            "contrib/*",
             "templatetags/*",
             "AUTHORS",
             "LICENSE",
