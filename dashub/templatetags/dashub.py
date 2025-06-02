@@ -700,6 +700,19 @@ def preserve_changelist_filters(context: Context) -> dict[str, dict[str, str]]:
     return {"params": preserved_params}
 
 
+@register.filter
+def is_crispy_form(form: Any) -> bool:
+    """
+    Check if the form has a crispy FormHelper attached.
+    """
+    try:
+        from crispy_forms.helper import FormHelper
+    except ImportError:
+        return False
+
+    return hasattr(form, 'helper') and isinstance(form.helper, FormHelper)
+
+
 
 
 

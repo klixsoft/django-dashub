@@ -60,10 +60,9 @@
 {% endblock %}
 
 {% block content %}
-
-    <div id="content-main" class="col-12">
-        <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post"
-              id="{{ opts.model_name }}_form" novalidate>
+    <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post"
+          id="{{ opts.model_name }}_form" novalidate>
+        <div id="content-main" class="col-12">
             {% csrf_token %}
             {% block form_top %}{% endblock %}
 
@@ -118,9 +117,8 @@
                     {% submit_row %}
                 {% endblock %}
             </div>
-        </form>
-    </div>
-
+        </div>
+    </form>
 {% endblock %}
 
 {% block extrajs %}

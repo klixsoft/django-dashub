@@ -1,7 +1,8 @@
 from django.db import models
-from .widgets import TagInputWidget
+from .widgets import TagInputWidget, ColorisWidget
 from dashub import widgets as dashub_widgets
 from django.contrib.admin import widgets as admin_widgets
+from django.forms import fields as form_fields
 
 
 class TagInputField(models.TextField):
@@ -40,7 +41,7 @@ class TagInputField(models.TextField):
     def get_prep_value(self, value):
         if value is None:
             return ""
-        if isinstance(value, list):
+        if isinstance(value, list) or isinstance(value, dict):
             return self.separator.join(value)
         return value
 
@@ -52,3 +53,22 @@ class TagInputField(models.TextField):
         name, path, args, kwargs = super().deconstruct()
         kwargs['separator'] = self.separator
         return name, path, args, kwargs
+
+
+class HexColorField(models.CharField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('max_length', 7)
+        super().__init__(*args, **kwargs)
+
+    def formfield(self, **kwargs):
+        """Use custom widget for both regular and admin forms"""
+        widget = kwargs.get("widget", ColorisWidget)
+
+        if widget == admin_widgets.AdminTextInputWidget:
+            widget = dashub_widgets.AdminColorisWidget()
+
+        kwargs["widget"] = widget
+        return super().formfield(**kwargs)
+
+
+

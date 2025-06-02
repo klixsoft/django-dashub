@@ -1,3 +1,4 @@
+{% load crispy_forms_tags %}
 {% load dashub %}
 {% get_sections adminform inline_admin_formsets as forms %}
 
@@ -17,6 +18,10 @@
             {% include fieldset.opts.template with inline_admin_formset=fieldset %}
         {% endif %}
     {% else %}
-        {% include "admin/includes/fieldset.html" with card=adminform|has_fieldsets card_header=adminform|has_fieldsets %}
+        {% if fieldset.form|is_crispy_form %}
+            {% crispy fieldset.form %}
+        {% else %}
+            {% include "admin/includes/fieldset.html" with card=adminform|has_fieldsets card_header=adminform|has_fieldsets %}
+        {% endif %}
     {% endif %}
 {% endfor %}

@@ -2,7 +2,7 @@ from typing import Optional, Any
 
 from django import forms
 from django.contrib.admin.widgets import AdminRadioSelect, AdminSplitDateTime, AdminDateWidget, AdminTimeWidget
-from django.forms.widgets import Select, SelectMultiple, CheckboxSelectMultiple, MultiWidget
+from django.forms.widgets import Select, SelectMultiple, CheckboxSelectMultiple, MultiWidget, TextInput
 from django.contrib.admin import widgets as admin_widgets, VERTICAL
 from django.utils.translation import gettext_lazy as _
 
@@ -173,5 +173,24 @@ class DashubAdminSplitDateTimeVerticalWidget(AdminSplitDateTime):
             context["time_label"] = _("Time")
 
         return context
+
+
+class ColorisWidget(TextInput):
+    def build_attrs(self, base_attrs, extra_attrs=None):
+        extra_attrs["color-picker"] = "color-picker"
+        return {**base_attrs, **(extra_attrs or {})}
+
+    @property
+    def media(self):
+        return forms.Media(
+            css={"all": ("https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.css",)},
+            js=("https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.js",),
+        )
+
+
+class AdminColorisWidget(ColorisWidget, admin_widgets.AdminTextInputWidget):
+    pass
+
+
 
 

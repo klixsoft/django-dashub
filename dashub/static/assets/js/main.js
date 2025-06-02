@@ -299,13 +299,16 @@
          *  Tagify Initialization
          *  =================== */
         function initializeTagify() {
-            $(".dashub_tag_input").each(function () {
+            $(document).find(".dashub_tag_input").each(function () {
                 if ($(this).closest(".empty-form").length === 0) {
-                    const delimiter = $(this).data("separator");
-                    new Tagify(this, {
-                        originalInputValueFormat: values => values.map(v => v.value).join(delimiter),
-                        delimiters: delimiter
-                    });
+                    const surroundingTagsEle = $(this).parent().find("tags");
+                    if (surroundingTagsEle.length <= 0) {
+                        const delimiter = $(this).data("separator");
+                        new Tagify(this, {
+                            originalInputValueFormat: values => values.map(v => v.value).join(delimiter),
+                            delimiters: delimiter
+                        });
+                    }
                 }
             });
         }

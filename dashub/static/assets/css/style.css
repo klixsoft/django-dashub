@@ -3781,7 +3781,7 @@ body .djn-group .ui-sortable-placeholder {
 }
 
 .tagify.form-control {
-    padding: 0;
+    padding: 4px;
 }
 
 .select2-container {
@@ -3913,6 +3913,9 @@ body .search-form-input::placeholder {
 
 .submit-row .submit-row-left {
     flex: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .btn-with-icon,
@@ -4128,5 +4131,14 @@ body .offcanvas {
 }
 
 #filtersOffcanvas .offcanvas-footer .btn {
+    width: 100%;
+}
+
+.asteriskField{
+    color:red !important;
+    margin-left: 5px;
+}
+
+.clr-field{
     width: 100%;
 }
