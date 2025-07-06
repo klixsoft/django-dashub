@@ -2,9 +2,10 @@
 {% get_current_language as LANGUAGE_CODE %}
 {% get_current_language_bidi as LANGUAGE_BIDI %}
 {% get_dashub_settings request as dashub_settings %}
+{% get_theme as theme %}
 
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %} data-bs-theme="{{ theme }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,7 +22,7 @@
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.9.4/dist/css/tempus-dominus.min.css"
           crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://use.hugeicons.com/font/icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
@@ -99,6 +100,24 @@
                                             </div>
                                         </div>
                                         <hr class="border-secondary border-opacity-50"/>
+                                        <p class="text-span">Apperance</p>
+
+                                        <div class="form-group">
+                                            <select class="form-control form-select theme_switcher">
+                                                <option value="system" {% if theme == 'system' %}selected{% endif %}>
+                                                    System Theme
+                                                </option>
+                                                <option value="light" {% if theme == 'light' %}selected{% endif %}>Light
+                                                    Theme
+                                                </option>
+                                                <option value="dark" {% if theme == 'dark' %}selected{% endif %}>Dark
+                                                    Theme
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <hr class="border-secondary border-opacity-50"/>
+
                                         <p class="text-span">Manage</p>
                                         {% get_user_menu user request.current_app|default:"admin" as user_menu %}
                                         {% for link in user_menu %}
@@ -149,9 +168,10 @@
             <nav class="dh-sidebar">
                 <div class="navbar-wrapper">
                     <div class="m-header">
-                        <a href="" class="b-brand text-primary">
+                        <a href="{% url 'admin:index' %}" class="b-brand text-primary">
                             <img src="{{ dashub_settings.site_logo }}" class="img-fluid logo-lg"
-                                 alt="{{ dashub_settings.site_title }}">
+                                 alt="{{ dashub_settings.site_title }}"
+                                 {% if dashub_settings.logo_width %}style="width:{{ dashub_settings.logo_width }}"{% endif %}>
                         </a>
                     </div>
                     <div class="navbar-content">
@@ -163,8 +183,24 @@
                                              class="user-avatar wid-45 rounded-circle"/>
                                     </div>
                                     <div class="flex-grow-1 ms-3 me-2">
-                                        <h6 class="mb-0">{{ request.user }}</h6>
-                                        <small>{{ request.user.get_role_display }}</small>
+                                        <h6 class="mb-0">
+                                            {% if request.user.get_full_name %}
+                                                {{ request.user.get_full_name }}
+                                            {% else %}
+                                                {{ request.user }}
+                                            {% endif %}
+                                        </h6>
+                                        <small>
+                                            {% if request.user.get_role_display %}
+                                                {{ request.user.get_role_display }}
+                                            {% elif request.user.role %}
+                                                {{ request.user.role }}
+                                            {% elif request.user.email %}
+                                                {{ request.user.email }}
+                                            {% elif request.user.username %}
+                                                {{ request.user.username }}
+                                            {% endif %}
+                                        </small>
                                     </div>
                                 </div>
                             </div>
@@ -176,6 +212,17 @@
                         </form>
 
                         <ul class="dh-navbar">
+                            {% if dashub_settings.include_dashboard %}
+                                <li class="dh-item">
+                                    <a href="{% url 'admin:index' %}" class="dh-link">
+                                    <span class="dh-micon">
+                                        <i class="nav-icon hgi hgi-stroke hgi-home-01"></i>
+                                    </span>
+                                        <span class="dh-mtext">{% trans "Dashboard" %}</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
                             {% for app in side_menu_list %}
                                 <li class="dh-item dh-caption">
                                     <label>{{ app.name }}</label>
@@ -320,7 +367,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
         crossorigin="anonymous"></script>
 <script type="text/javascript"
-            src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.9.11/dist/js/tempus-dominus.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.9.11/dist/js/jQuery-provider.js"></script>
 

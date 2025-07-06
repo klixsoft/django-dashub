@@ -23,31 +23,31 @@
     <div class="form-group mb-3{% if line.fields|length == 1 and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
         <div class="row">
             {% for field in line %}
-                <label class="{% if not line.fields|length == 1 and forloop.counter != 1 %}col-auto {% else %}col-sm-12 {% endif %}"
-                       for="id_{{ field.field.name }}">
-                    {{ field.field.label|capfirst }}
-                    {% if field.field.field.required %}
-                        <span class="text-red">* </span>
-                    {% endif %}
-                </label>
-                <div class="{% if not line.fields|length == 1 %} col-auto  fieldBox {% else %} col-sm-12 {% endif %}
-                             {% if field.field.name %} field-{{ field.field.name }}{% endif %}
+                <div class="{% if not line.fields|length == 1 %}col fieldBox {% else %}col-sm-12 {% endif %}">
+                    <label for="id_{{ field.field.name }}">
+                        {{ field.field.label|capfirst }}
+                        {% if field.field.field.required %}
+                            <span class="text-red">* </span>
+                        {% endif %}
+                    </label>
+                    <div class="{% if field.field.name %} field-{{ field.field.name }}{% endif %}
                              {% if not field.is_readonly and field.errors %} errors{% endif %}
                              {% if field.field.is_hidden %} hidden {% endif %}
                              {% if field.is_checkcard %} checkcard-row{% endif %}">
-                    {% if field.is_readonly %}
-                        {{ field.contents }}
-                    {% else %}
-                        {{ field.field|render_form_field_class }}
-                    {% endif %}
-                    <div class="help-block red">
-                        {% if not line.fields|length == 1 and not field.is_readonly %}{{ field.errors }}{% endif %}
-                    </div>
-                    {% if field.field.help_text %}
-                        <div class="help-block">{{ field.field.help_text|safe }}</div>
-                    {% endif %}
-                    <div class="help-block text-red">
-                        {% if line.fields|length == 1 %}{{ line.errors }}{% endif %}
+                        {% if field.is_readonly %}
+                            {{ field.contents }}
+                        {% else %}
+                            {{ field.field|render_form_field_class }}
+                        {% endif %}
+                        <div class="help-block red">
+                            {% if not line.fields|length == 1 and not field.is_readonly %}{{ field.errors }}{% endif %}
+                        </div>
+                        {% if field.field.help_text %}
+                            <div class="help-block">{{ field.field.help_text|safe }}</div>
+                        {% endif %}
+                        <div class="help-block text-red">
+                            {% if line.fields|length == 1 %}{{ line.errors }}{% endif %}
+                        </div>
                     </div>
                 </div>
             {% endfor %}

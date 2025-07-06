@@ -63,9 +63,7 @@
                                     {% if inline_admin_form.original %}
                                         <span class="delete djn-delete-handler {{ inline_admin_formset.handler_classes|join:" " }}">{{ inline_admin_form.deletion_field.field }} {{ inline_admin_form.deletion_field.label_tag }}</span>
                                     {% else %}
-                                        <span><a
-                                                class="inline-deletelink djn-remove-handler {{ inline_admin_formset.handler_classes|join:" " }}"
-                                                href="javascript:void(0)">Remove</a></span>
+                                        <span><a class="inline-deletelink djn-remove-handler {{ inline_admin_formset.handler_classes|join:" " }}" href="javascript:void(0)">Remove</a></span>
                                     {% endif %}
                                 {% endif %}
                             </h3>
@@ -104,11 +102,13 @@
                 {% endwith %}
             </div>
             <div class="djn-module djn-add-item add-item add-row">
-                <a href="javascript://"
-                   class="add-handler djn-add-handler {{ inline_admin_formset.handler_classes|join:" " }}">
+                <button type="button"
+                        class="add-handler btn btn-outline-secondary djn-add-handler {{ inline_admin_formset.handler_classes|join:" " }}">
+                    <i class="hgi hgi-stroke hgi-add-circle-half-dot"></i>
                     {% blocktrans with inline_admin_formset.opts.verbose_name|strip_parent_name:inline_opts.verbose_name|title as verbose_name %}
-                        Add another {{ verbose_name }}{% endblocktrans %}
-                </a>
+                        Add another {{ verbose_name }}
+                    {% endblocktrans %}
+                </button>
             </div>
             {% if inline_admin_formset.is_collapsible %}</details>{% endif %}
             {% ifinlineclasses %}</fieldset>{% endifinlineclasses %}

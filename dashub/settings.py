@@ -3,22 +3,28 @@ import logging
 from typing import Any, Dict
 
 from django.conf import settings
+from django.core.handlers.wsgi import WSGIRequest
 
-from .utils import hex_to_rgb
+from .utils import hex_to_rgb, evaluate_dynamic_value
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_SETTINGS: Dict[str, Any] = {
     # title of the window (Will default to current_admin_site.site_title)
-    "site_title": "Admin Dashboard",
+    "site_title": lambda: "Admin Dashboard",
     # Title on the login screen (19 chars max) (will default to current_admin_site.site_header)
-    "site_header": None,
+    "site_header": lambda: None,
     # Title on the brand (19 chars max) (will default to current_admin_site.site_header)
-    "site_brand": None,
+    "site_brand": lambda: None,
     # URL of the logo for your site, used for brand on top left
-    "site_logo": "https://cdn.practet.com/static/logo-new.webp",
+    "site_logo": lambda: "https://cdn.practet.com/static/logo-new.webp",
+
+    "logo_width": None,
+
+    "include_dashboard": True,
+
     # Relative path to a favicon for your site, will default to site_logo if absent (ideally 32x32 px)
-    "site_icon": None,
+    "site_icon": lambda: None,
     ############
     # Top Menu #
     ############
@@ -66,8 +72,13 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "use_compressed_assets": False,
 
     # Styles
-    "theme_color": "#e31837",
-    "border_radius": "4px"
+    "theme_color": lambda: "#e31837",
+    "border_radius": "4px",
+
+    # Dashboard Overview
+    "theme": "system",
+    "include_dashboard_list": True,
+    "analytics_template": None
 }
 
 CHANGEFORM_TEMPLATES = {
@@ -104,3 +115,21 @@ def get_settings() -> Dict:
 
     dashub_settings["theme_color_rgb"] = hex_to_rgb(dashub_settings.get("theme_color", "#30AA99"))
     return dashub_settings
+
+
+def get_resolved_settings(request: WSGIRequest = None) -> Dict:
+    """
+    Get settings with all dynamic values resolved
+    """
+    settings_dict = get_settings()
+
+    for key in settings_dict:
+        settings_dict[key] = evaluate_dynamic_value(settings_dict[key], request)
+
+    if 'theme_color' in settings_dict and settings_dict['theme_color']:
+        settings_dict["theme_color_rgb"] = hex_to_rgb(settings_dict.get("theme_color", "#30AA99"))
+
+    if not settings_dict.get("site_icon") and settings_dict.get("site_logo"):
+        settings_dict["site_icon"] = settings_dict["site_logo"]
+
+    return settings_dict

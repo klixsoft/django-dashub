@@ -1,8 +1,10 @@
 import copy
+import importlib
 import itertools
 import json
 import logging
 import urllib.parse
+from datetime import timedelta
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from django.apps import apps
@@ -23,6 +25,7 @@ from django.template.defaultfilters import capfirst
 from django.template.loader import get_template
 from django.templatetags.static import static
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import escape, format_html
 from django.utils.safestring import SafeText, mark_safe
 from django.utils.text import get_text_list, slugify
@@ -30,7 +33,7 @@ from django.utils.translation import gettext
 from django.forms import widgets, JSONField
 
 from .. import version
-from ..settings import CHANGEFORM_TEMPLATES, get_settings
+from ..settings import CHANGEFORM_TEMPLATES, get_resolved_settings
 from ..utils import (
     get_admin_url,
     get_filter_id,
@@ -72,7 +75,7 @@ def get_side_menu(context: Context, using: str = "available_apps") -> List[Dict[
     if not user:
         return []
 
-    options = get_settings()
+    options = get_resolved_settings()
     default_orders = options.get("default_orders", {})
     installed_apps = get_installed_apps()
     available_apps = copy.deepcopy(context.get(using, []))
@@ -102,7 +105,7 @@ def get_side_menu(context: Context, using: str = "available_apps") -> List[Dict[
     submenus_models = set(options.get("submenus_models", []))
     hidden_apps = set(options.get("hide_apps", []))
     hidden_models = set(options.get("hide_models", []))
-    order_menus = options.get("order_menus", [])
+    order_menus = options.get("default_orders", [])
 
     menu = []
 
@@ -112,7 +115,7 @@ def get_side_menu(context: Context, using: str = "available_apps") -> List[Dict[
             continue
 
         app["icon"] = options["icons"].get(app_label, options["default_icon_parents"])
-        app["order"] = order_menus[app_label] if app_label in order_menus else default_orders.get(app_label, 0)
+        app["order"] = order_menus[app_label] if app_label in order_menus else default_orders.get(app_label, 1000)
 
         menu_items = []
 
@@ -127,7 +130,7 @@ def get_side_menu(context: Context, using: str = "available_apps") -> List[Dict[
             model["count"] = model.get("model", {}).objects.count() if model.get("model") else 0
             model["model_str"] = model_str
             model["icon"] = options["icons"].get(model_str, options["default_icon_children"])
-            model["order"] = model.get("order", default_orders.get(model_str, 0))
+            model["order"] = model.get("order", default_orders.get(model_str, 1000))
 
             finded_menus = {}
             if app_custom_links:
@@ -142,7 +145,7 @@ def get_side_menu(context: Context, using: str = "available_apps") -> List[Dict[
                 custom_links_submenus = finded_menus.get("submenu", [])
                 submenu.extend(custom_links_submenus)
                 app_custom_links = [link for link in app_custom_links if link['name'] != model_object_name]
-            model["submenu"] = sorted(submenu, key=lambda x: x.get("order", 0), reverse=True)
+            model["submenu"] = sorted(submenu, key=lambda x: x.get("order", 1000), reverse=True)
             menu_items.append(model)
         if app_custom_links:
             for new_link in app_custom_links:
@@ -154,7 +157,7 @@ def get_side_menu(context: Context, using: str = "available_apps") -> List[Dict[
                     menu_items.append(new_link)
 
         if menu_items:
-            app["models"] = sorted(menu_items, key=lambda x: x.get("order", 0))
+            app["models"] = sorted(menu_items, key=lambda x: x.get("order", 1000))
             menu.append(app)
 
     return order_menus_with_order(menu, order_menus)
@@ -169,20 +172,20 @@ def order_menus_with_order(menu: List[Dict[str, Any]], order_menus: List[str]) -
 
     def get_order_index(item: Dict[str, Any]) -> int:
         """Returns the order index of an app."""
-        return order_map.get(item["app_label"].lower(), item.get("order", 0))
+        return order_map.get(item["app_label"].lower(), item.get("order", 1000))
 
     def sort_models(models: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Sort models inside apps based on 'order' key."""
         for model in models:
             if "submenu" in model:
-                model["submenu"].sort(key=lambda x: x.get("order", 0), reverse=True)
-        return sorted(models, key=lambda x: x.get("order", 0), reverse=True)
+                model["submenu"].sort(key=lambda x: x.get("order", 1000), reverse=False)
+        return sorted(models, key=lambda x: x.get("order", 1000), reverse=False)
 
     for app in menu:
         if "models" in app:
             app["models"] = sort_models(app["models"])
 
-    return sorted(menu, key=get_order_index, reverse=True)
+    return sorted(menu, key=get_order_index, reverse=False)
 
 
 @register.simple_tag
@@ -190,7 +193,7 @@ def get_top_menu(user: AbstractUser, admin_site: str = "admin") -> List[Dict]:
     """
     Produce the menu for the top nav bar
     """
-    options = get_settings()
+    options = get_resolved_settings()
     return make_menu(user, options.get("topmenu_links", []), options, None, allow_appmenus=True, admin_site=admin_site)
 
 
@@ -199,7 +202,7 @@ def get_user_menu(user: AbstractUser, admin_site: str = "admin") -> List[Dict]:
     """
     Produce the menu for the user dropdown
     """
-    options = get_settings()
+    options = get_resolved_settings()
     return make_menu(
         user,
         options.get("usermenu_links", []),
@@ -215,7 +218,7 @@ def get_dashub_settings(request: WSGIRequest) -> Dict:
     """
     Get Practet Dashboard settings, update any defaults from the request, and return
     """
-    settings = get_settings()
+    settings = get_resolved_settings(request)
 
     admin_site = {x.name: x for x in all_sites}.get("admin", {})
     if not settings["site_title"]:
@@ -248,7 +251,7 @@ def get_user_avatar(user: AbstractUser) -> str:
         - A callable that receives the user instance e.g lambda u: u.profile.image.url
     """
     no_avatar = static("assets/img/user.svg")
-    options = get_settings()
+    options = get_resolved_settings()
     avatar_field_name: Optional[Union[str, Callable]] = options.get("user_avatar")
 
     if not avatar_field_name:
@@ -444,7 +447,7 @@ def get_changeform_template(adminform: AdminForm) -> str:
     Go get the correct change form template based on the modeladmin being used,
     the default template, or the overridden one for this modeladmin
     """
-    options = get_settings()
+    options = get_resolved_settings()
     has_fieldsets = has_fieldsets_check(adminform)
     inlines = adminform.model_admin.inlines
     has_inlines = inlines and len(inlines) > 0
@@ -470,7 +473,7 @@ def get_changeform_template_class(adminform: AdminForm) -> str:
     Go get the correct change form template based on the modeladmin being used,
     the default template, or the overridden one for this modeladmin
     """
-    options = get_settings()
+    options = get_resolved_settings()
     has_fieldsets = has_fieldsets_check(adminform)
     inlines = adminform.model_admin.inlines
     has_inlines = inlines and len(inlines) > 0
@@ -710,7 +713,51 @@ def is_crispy_form(form: Any) -> bool:
     except ImportError:
         return False
 
+    if not "crispy_forms" in settings.INSTALLED_APPS:
+        return False
+
     return hasattr(form, 'helper') and isinstance(form.helper, FormHelper)
+
+
+
+@register.simple_tag
+def crispy_available():
+    try:
+        if not "crispy_forms" in settings.INSTALLED_APPS:
+            return False
+
+        importlib.import_module("crispy_forms")
+        return True
+    except ImportError:
+        return False
+
+
+@register.simple_tag(takes_context=True)
+def get_theme(context):
+    request = context['request']
+    cookie_theme_choice = request.COOKIES.get('dashub_theme')
+    cookie_resolved_theme = request.COOKIES.get('dashub_theme_resolved')
+    dashub_settings = get_dashub_settings(request)
+
+    theme_from_settings = getattr(dashub_settings, "theme") if hasattr(dashub_settings, "theme") else "system"
+    theme_choice = cookie_theme_choice or theme_from_settings or 'system'
+
+    if theme_choice == 'system':
+        if cookie_resolved_theme:
+            return cookie_resolved_theme
+        else:
+            return 'light'
+    else:
+        return theme_choice
+
+
+
+
+
+
+
+
+
 
 
 

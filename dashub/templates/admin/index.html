@@ -20,35 +20,35 @@
     {% endif %}
 
     <div class="col-12">
-        <div class="row">
-            {% for app in dashboard_list %}
-                {% for model in app.models %}
-                    {% if model.count >= 0 %}
-                    <div class="col-md-6 col-xl-3">
+        {% get_dashub_settings request as dashub_settings %}
+        {% if dashub_settings.analytics_template %}
+            {% include dashub_settings.analytics_template with dashboard_list=dashboard_list %}
+        {% endif %}
+
+        {% if dashub_settings.include_dashboard_list %}
+            <div class="row">
+                {% for app in dashboard_list %}
+                    <div class="col-12 col-md-6 col-xl-4 mb-4">
                         <div class="card dashboard_card">
+                            <div class="card-header">{{ app.name }}</div>
                             <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <div class="avatar bg-dark bg-opacity-10 rounded">
-                                            <i class="{{ model.icon }} text-muted"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 text-end">
-                                        <p class="text-muted mb-0 text-truncate">{{ model.name }}</p>
-                                        <h3 class="text-dark mt-1 mb-0">{{ model.count  }}</h3>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer py-2 bg-light bg-opacity-50">
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <a href="{% if model.url %}{{ model.url }}{% else %}#!{% endif %}" class="text-reset fw-medium">View More</a>
+                                <div>
+                                    {% for model in app.models %}
+                                        <a href="{% if model.url %}{{ model.url }}{% else %}#!{% endif %}"
+                                           class="text-reset fw-medium">
+                                            <div>
+                                                <i class="{{ model.icon }} text-muted"></i>
+                                                <p class="text-muted mb-0 text-truncate">{{ model.name }}</p>
+                                            </div>
+                                            <div>{{ model.count }}</div>
+                                        </a>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {% endif %}
                 {% endfor %}
-            {% endfor %}
-        </div>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}

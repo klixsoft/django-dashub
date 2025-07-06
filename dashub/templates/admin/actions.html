@@ -6,9 +6,9 @@
             {% for field in action_form %}<label>{{ field }}</label>{% endfor %}
         {% endblock %}
         {% block actions-submit %}
-            <button type="submit" class="btn btn-primary" style="margin-right: 5px; margin-left: 15px;"
+            <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-1" style="margin-right: 5px; margin-left: 15px;"
                     title="{% trans "Run the selected action" %}" name="index" value="{{ action_index|default:0 }}">
-                {% trans "Go" %}
+                {% trans "Apply" %} <i class="hgi hgi-stroke hgi-arrow-right-double"></i>
             </button>
         {% endblock %}
         {% block actions-counter %}

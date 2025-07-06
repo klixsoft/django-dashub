@@ -171,35 +171,66 @@
         /** =====================
          *  DateTime Picker Setup
          *  ===================== */
+        document.addEventListener("click", function (e) {
+            if (e.target.classList.contains("vCheckboxLabel")) {
+                const checkboxLabel = $(e.target);
+                if (checkboxLabel.parent().hasClass("delete")) {
+                    const cardEle = checkboxLabel.closest(".djn-item");
+                    if (cardEle.length > 0) {
+                        if (cardEle.hasClass("grp-predelete")) {
+                            cardEle.tooltip('dispose');
+                            cardEle.removeAttr('data-bs-toggle data-bs-placement title');
+                        } else {
+                            cardEle.find(".djn-item-content").slideUp();
+                            cardEle.removeClass("open");
 
-        $(".datetime").each(function () {
-            const hasTwoInputs = $(this).find("input").length > 1;
-            if (!hasTwoInputs) return;
+                            cardEle.attr({
+                                'data-bs-toggle': 'tooltip',
+                                'data-bs-placement': 'top',
+                                'title': 'Click on save button to delete permanently'
+                            });
+                            cardEle.tooltip();
+                        }
+                    }
+                }
+            }
+        }, true);
 
-            $(this).find("[size=10]").tempusDominus({
+
+        const dateTimeEle = $(document).find(".datetime")
+        if (dateTimeEle.length > 0) {
+            dateTimeEle.each(function () {
+                const hasTwoInputs = $(this).find("input").length > 1;
+                if (!hasTwoInputs) return;
+
+                $(this).find("[size=10]").tempusDominus({
+                    display: {
+                        components: {calendar: true, date: true, month: true, year: true, decades: true, clock: false},
+                        theme: "light"
+                    },
+                    localization: {format: 'yyyy-MM-dd'}
+                });
+
+                $(this).find("[size=8]").tempusDominus({
+                    display: {
+                        components: {clock: true, hours: true, minutes: true},
+                        theme: "light"
+                    },
+                    localization: {format: 'HH:mm:ss'}
+                });
+            });
+        }
+
+        const vDateFieldEle = $(document).find(".vDateField");
+        if (vDateFieldEle.length > 0) {
+            $(".vDateField").tempusDominus({
                 display: {
-                    components: {calendar: true, date: true, month: true, year: true, decades: true, clock: false},
+                    components: {calendar: true, date: true, month: true, year: true, decades: true},
                     theme: "light"
                 },
                 localization: {format: 'yyyy-MM-dd'}
             });
-
-            $(this).find("[size=8]").tempusDominus({
-                display: {
-                    components: {clock: true, hours: true, minutes: true},
-                    theme: "light"
-                },
-                localization: {format: 'HH:mm:ss'}
-            });
-        });
-
-        $(".vDateField").tempusDominus({
-            display: {
-                components: {calendar: true, date: true, month: true, year: true, decades: true},
-                theme: "light"
-            },
-            localization: {format: 'yyyy-MM-dd'}
-        });
+        }
 
         /** ========================
          *  Form Field Error Handling
@@ -327,14 +358,6 @@
         /** ===================
          *  Inline Collapse Logic
          *  =================== */
-        $(document).on("click", ".vCheckboxLabel", function () {
-            const card = $(this).closest(".djn-item");
-            if (card.find(".djn-item-content").is(":visible")) {
-                card.find(".djn-item-content").slideUp();
-                card.removeClass("open");
-            }
-        });
-
         $(document).on("click", ".djn-inline-form .djn-drag-handler", function () {
             const item = $(this).closest(".djn-item");
             if (item.hasClass("grp-predelete")) return;
@@ -385,5 +408,97 @@
             const name = $(this).find("option[data-name]").eq(0).data("name");
             $(this).attr("name", value && name ? name : null);
         });
+
+        const themeSwitcher = $(document).find(".theme_switcher");
+
+        function setThemeCookie(themeChoice, resolvedTheme) {
+            const expiryDate = new Date();
+            expiryDate.setTime(expiryDate.getTime() + (30 * 24 * 60 * 60 * 1000));
+            document.cookie = `dashub_theme=${themeChoice}; path=/; expires=${expiryDate.toUTCString()}`;
+            document.cookie = `dashub_theme_resolved=${resolvedTheme}; path=/; expires=${expiryDate.toUTCString()}`;
+        }
+
+        function getThemeCookie() {
+            const cookies = document.cookie.split(';');
+            const themeChoice = cookies.find(cookie => cookie.trim().startsWith('dashub_theme='))?.split('=')[1];
+            const resolvedTheme = cookies.find(cookie => cookie.trim().startsWith('dashub_theme_resolved='))?.split('=')[1];
+            return {themeChoice, resolvedTheme};
+        }
+
+        function getSystemTheme() {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function handleChangeInTinymce(theme) {
+            if (window.tinymce && tinymce.activeEditor) {
+                const dom = tinymce.activeEditor.dom;
+                const htmlElement = dom.select('html')[0];
+
+                if (htmlElement) {
+                    dom.setAttrib(htmlElement, 'data-bs-theme', theme);
+                }
+            }
+        }
+
+        function getCurrentTheme() {
+            const systemTheme = getSystemTheme();
+            const currentThemeChoice = themeSwitcher.val() || "system";
+            const currentTheme = currentThemeChoice === "system" ? systemTheme : currentThemeChoice;
+
+            return {
+                currentTheme,
+                currentThemeChoice
+            }
+        }
+
+        function handleThemeChange() {
+            const {currentTheme, currentThemeChoice} = getCurrentTheme();
+            document.documentElement.setAttribute("data-bs-theme", currentTheme);
+            handleChangeInTinymce(currentTheme);
+            setThemeCookie(currentThemeChoice, currentTheme);
+        }
+
+        function initializeTheme() {
+            const {themeChoice, resolvedTheme} = getThemeCookie();
+            const systemTheme = getSystemTheme();
+
+            let finalTheme;
+            let needUpdate = false;
+
+            if (themeChoice === 'system') {
+                finalTheme = resolvedTheme || systemTheme;
+                needUpdate = true;
+            } else {
+                finalTheme = themeChoice || 'system';
+                if (finalTheme === 'system') {
+                    finalTheme = systemTheme;
+                    needUpdate = true;
+                }
+            }
+
+            document.documentElement.setAttribute("data-bs-theme", finalTheme);
+            if (themeSwitcher.length) {
+                themeSwitcher.val(themeChoice || 'system');
+            }
+
+            if (needUpdate) {
+                setThemeCookie(themeChoice || 'system', finalTheme);
+            }
+        }
+
+        initializeTheme();
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', handleThemeChange);
+        themeSwitcher.change(handleThemeChange);
+
+        if (window.tinymce) {
+            tinymce.on('AddEditor', function (e) {
+                const editor = e.editor;
+                editor.on('init', function () {
+                    const {currentTheme} = getCurrentTheme();
+                    editor.dom.setAttrib(editor.getDoc().documentElement, 'data-bs-theme', currentTheme);
+                });
+            });
+        }
     })($);
 })();

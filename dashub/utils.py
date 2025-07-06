@@ -1,4 +1,6 @@
 import datetime
+import importlib
+import inspect
 import logging
 from typing import Any, Callable, Dict, List, Set, Union, Optional
 from urllib.parse import urlencode
@@ -8,8 +10,10 @@ from django.conf import settings
 from django.contrib.admin import ListFilter
 from django.contrib.admin.helpers import AdminForm
 from django.contrib.auth.models import AbstractUser
+from django.core.handlers.wsgi import WSGIRequest
 from django.db.models.base import Model, ModelBase
 from django.db.models.options import Options
+from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
 
@@ -334,12 +338,23 @@ def hex_to_rgb(hex_color):
     :param hex_color: str, hex color code (e.g., "#FF5733" or "FF5733")
     :return: str, "r, g, b"
     """
-    hex_color = hex_color.lstrip('#')  # Remove '#' if present
-    if len(hex_color) != 6:
-        raise ValueError("Invalid hex color format")
 
-    r, g, b = (int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
-    return f"{r}, {g}, {b}"
+    # Check for valid hex color format
+    try:
+        if not isinstance(hex_color, str):
+            raise ValueError("Hex color must be a string")
+
+        if not hex_color.startswith('#'):
+            hex_color = '#' + hex_color
+
+        hex_color = hex_color.lstrip('#')  # Remove '#' if present
+        if len(hex_color) != 6:
+            raise ValueError("Invalid hex color format")
+
+        r, g, b = (int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
+        return f"{r}, {g}, {b}"
+    except Exception:
+        return f"0, 0, 0"
 
 
 
@@ -359,6 +374,76 @@ def parse_datetime_str(value: str) -> Optional[datetime.datetime]:
         except (ValueError, TypeError):
             continue
     return None
+
+
+def resolve_dynamic_value(value: Any, request: WSGIRequest = None, **kwargs) -> Any:
+    """
+    Resolve a value that can be either static or a callable function.
+
+    Args:
+        value: The value to resolve (can be static value or callable)
+        request: Django request object to pass to callable
+        **kwargs: Additional keyword arguments to pass to callable
+
+    Returns:
+        The resolved value
+    """
+    if callable(value):
+        try:
+            if request is not None:
+                try:
+                    return value(request, **kwargs)
+                except TypeError as e:
+                    print(f"Error calling dynamic value with request: {e}")
+                    return value(**kwargs)
+            else:
+                return value(**kwargs)
+        except Exception as e:
+            print(f"Error resolving dynamic value: {e}")
+            return value
+    return value
+
+
+def import_from_string(path: str) -> Callable:
+    """
+    Import a function from a dotted path string (e.g., 'myapp.utils.func')
+    """
+    module_path, func_name = path.rsplit('.', 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, func_name)
+
+
+def evaluate_dynamic_value(
+    value: Union[str, Callable],
+    *args,
+    **kwargs
+) -> Any:
+    """
+    Try to resolve a value:
+    - If it's a callable, call it
+    - If it's a string path to function, import and call it
+    - If import/call fails, return the string as-is (assumed to be path)
+    """
+    if isinstance(value, (dict, list, tuple, set)):
+        return value
+
+    if callable(value):
+        try:
+            return value(*args, **kwargs)
+        except Exception:
+            ...
+
+    if isinstance(value, str):
+        try:
+            func = import_from_string(value)
+            return func(*args, **kwargs)
+        except (ImportError, AttributeError, ValueError) as e:
+            ...
+
+    return value
+
+
+
 
 
 

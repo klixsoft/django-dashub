@@ -1,3 +1,5 @@
+@import "theme.css";
+
 .login-card {
     min-height: 100vh;
     display: -webkit-box;
@@ -10,11 +12,15 @@
     -ms-flex-pack: center;
     justify-content: center;
     margin: 0 auto;
-    background: url("https://cdn.practet.com/dashboard/login.avif");
+    background: url("/static/login.avif");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
     padding: 30px 12px;
+}
+
+[data-bs-theme="dark"] .login-card {
+    background: none;
 }
 
 .login-card .logo {
@@ -37,7 +43,7 @@
     -webkit-box-shadow: 0 0 37px rgba(8, 21, 66, 0.05);
     box-shadow: 0 0 37px rgba(8, 21, 66, 0.05);
     margin: 0 auto;
-    background-color: #fff;
+    background-color: var(--dh-sidebar-background);
 }
 
 .login-card .login-main .theme-form h4 {
@@ -89,4 +95,8 @@
     top: 30%;
     right: 7%;
     cursor: pointer;
+}
+
+[data-bs-theme="dark"] .login-card .logo img {
+    filter: brightness(0) invert(1);
 }
