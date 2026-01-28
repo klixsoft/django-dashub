@@ -4262,3 +4262,7 @@ body .offcanvas {
 [data-bs-theme="dark"] .dh-sidebar .m-header .b-brand img {
     filter: brightness(0) invert(1);
 }
+
+.tox:not(.tox-tinymce-inline).tox-tinymce--toolbar-sticky-on .tox-editor-header{
+    top: 75px !important;
+}

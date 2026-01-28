@@ -24,7 +24,7 @@ from django.template import Context, Library
 from django.template.defaultfilters import capfirst
 from django.template.loader import get_template
 from django.templatetags.static import static
-from django.urls import reverse
+from django.urls import reverse, NoReverseMatch
 from django.utils import timezone
 from django.utils.html import escape, format_html
 from django.utils.safestring import SafeText, mark_safe
@@ -324,8 +324,7 @@ def dashub_paginator_number(change_list: ChangeList, i: int) -> SafeText:
             <a class="page-link" href="{link}" data-dt-idx="7" tabindex="0">Next</a>
         </li>
         """.format(link=link, disabled="disabled" if link == "#" else "")
-
-    return format_html(html_str)
+    return mark_safe(html_str)
 
 
 @register.simple_tag
@@ -751,6 +750,12 @@ def get_theme(context):
         return theme_choice
 
 
+@register.simple_tag
+def safe_admin_changelist_url(opts):
+    try:
+        return reverse(f'admin:{opts.app_label}_{opts.model_name}_changelist')
+    except NoReverseMatch:
+        return None
 
 
 
@@ -763,3 +768,135 @@ def get_theme(context):
 
 
 
+
+@register.simple_tag(takes_context=True)
+def get_analytics_data(context):
+    """
+    Gather analytics data which can be explicitly configured via settings.
+    Configuration format in settings:
+    analytics_models = [
+        {"model": "user.user", "date_field": "date_joined", "label": "New Users"},
+        {"model": "orders.order", "date_field": "created_at"}
+    ]
+    """
+    from django.db.models import Count
+    from django.db.models.functions import TruncDay
+    from django.utils import timezone
+    import datetime
+
+    user = context.get("user")
+    if not user:
+        return {}
+
+    configured_analytics = options.get("analytics_models", [])
+    
+    total_apps = 0
+    total_models = 0
+    total_records = 0
+    
+    hidden_apps = set(options.get("hide_apps", []))
+    hidden_models = set(options.get("hide_models", []))
+
+
+    # Calculate Totals (Always do this for system overview)
+    installed_apps = apps.get_app_configs()
+    for app_config in installed_apps:
+        if app_config.label.lower() in hidden_apps:
+            continue
+        
+        has_visible_models = False
+        for model in app_config.get_models():
+            model_key = f"{app_config.label.lower()}.{model._meta.model_name.lower()}"
+            if model_key in hidden_models:
+                continue
+            
+            has_visible_models = True
+            total_models += 1
+            try:
+                total_records += model.objects.count()
+            except: 
+                pass
+        
+        if has_visible_models:
+            total_apps += 1
+
+    series_definitions = []
+    
+    if configured_analytics:
+        for config in configured_analytics:
+            try:
+                app_label, model_name = config['model'].split('.')
+                model = apps.get_model(app_label, model_name)
+                
+                series_definitions.append({
+                    "model": model,
+                    "name": config.get("label", model._meta.verbose_name_plural.title()),
+                    "field": config.get("date_field", "created_at"),
+                })
+            except LookupError:
+                pass 
+    else:
+        candidates = []
+        for app_config in installed_apps:
+            if app_config.label.lower() in hidden_apps: continue
+            
+            for model in app_config.get_models():
+                model_key = f"{app_config.label.lower()}.{model._meta.model_name.lower()}"
+                if model_key in hidden_models: continue
+                
+                try:
+                    if count == 0: continue
+                    
+                    date_field = None
+                    for field in model._meta.get_fields():
+                         if field.name in ['created_at', 'date_joined', 'timestamp', 'created']:
+                             date_field = field.name
+                             break
+                    
+                    if date_field:
+                        candidates.append({
+                            "model": model,
+                            "name": model._meta.verbose_name_plural.title(),
+                            "field": date_field,
+                            "count": count
+                        })
+                except:
+                    pass
+        
+        candidates.sort(key=lambda x: x["count"], reverse=True)
+        series_definitions = candidates[:5]
+
+    processed_series = []
+    days = 30
+    start_date = timezone.now() - datetime.timedelta(days=days)
+    
+    for item in series_definitions:
+        try:
+            qs = item["model"].objects.filter(**{f"{item['field']}__gte": start_date}) \
+                .annotate(date=TruncDay(item['field'])) \
+                .values('date') \
+                .annotate(count=Count('id')) \
+                .order_by('date')
+            
+            data_points = []
+            for entry in qs:
+                if entry['date']:
+                    data_points.append({
+                        "date": entry['date'].strftime("%Y-%m-%d"),
+                        "count": entry['count']
+                    })
+            
+            if data_points:
+                processed_series.append({
+                    "name": item["name"],
+                    "data": data_points
+                })
+        except Exception:
+            pass
+
+    return {
+        "total_apps": total_apps,
+        "total_models": total_models,
+        "total_records": total_records,
+        "series": processed_series
+    }

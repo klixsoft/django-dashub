@@ -8,7 +8,7 @@ from django.forms import fields as form_fields
 class TagInputField(models.TextField):
     """
     Custom ModelField that stores a string of tags separated by a custom separator,
-    but presents and accepts data as a list in Python.
+    but presents and accepts content as a list in Python.
     """
 
     def __init__(self, *args, separator=":::", **kwargs):

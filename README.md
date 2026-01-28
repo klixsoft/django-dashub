@@ -223,7 +223,122 @@ This configuration assigns icons to `core.page`, `core.post`, and `healthpackage
 
 - **Note:** Icons are only applied to models. Submenus do not have icons.
 
-## 8. **Full Configuration Example**
+## 8. **Analytics Configuration**
+
+### `analytics_models`
+By default, Dashub automatically detects the top 5 largest models with date fields to display in the growth charts. You can strictly configure which models appear using the `analytics_models` setting.
+
+- **Format:**
+  ```python
+  "analytics_models": [
+      {
+          "model": "app_name.model_name",
+          "date_field": "field_name",
+          "label": "Custom Label"
+      }
+  ]
+  ```
+
+- **Example:**
+  ```python
+  "analytics_models": [
+      {
+          "model": "auth.user",
+          "date_field": "date_joined",
+          "label": "New Signups"
+      },
+      {
+          "model": "orders.order",
+          "date_field": "created_at",
+          "label": "Sales"
+      }
+  ]
+  ```
+
+When configured, the dashboard charts will **only** show data from these specified models.
+
+## 9. **Custom Template Tags & Filters**
+
+Dashub provides several template tags to enhance your admin templates. Load them using `{% load dashub %}`.
+
+### `get_side_menu`
+Generates the sidebar menu structure.
+```html
+{% load dashub %}
+{% get_side_menu as menu_list %}
+```
+
+### `get_dashub_settings`
+Retrieves the current Dashub configuration settings.
+```html
+{% get_dashub_settings as settings %}
+{{ settings.site_logo }}
+```
+
+### `get_user_avatar`
+Fetches the avatar for the current user. It respects the `user_avatar` setting.
+```html
+{% get_user_avatar request.user as avatar_url %}
+<img src="{{ avatar_url }}">
+```
+
+### `get_analytics_data`
+Retrieves analytics stats (Total Apps, Models, Records) and time-series data for the dashboard.
+```html
+{% get_analytics_data as analytics %}
+{{ analytics.total_records }}
+```
+
+## 10. **Custom Filters**
+
+Dashub includes a set of enhanced filters for the Django admin changelist.
+
+### Standard Filters
+- `RadioFilter`: Renders standard list filter as radio buttons.
+- `CheckboxFilter`: Renders standard list filter as checkboxes.
+- `DropdownFilter`: Renders standard list filter as a dropdown (select).
+- `MultipleDropdownFilter`: Dropdown allowing multiple selections.
+
+### Choice Field Filters
+For fields with `choices` defined:
+- `ChoicesRadioFilter`
+- `ChoicesCheckboxFilter`
+- `ChoicesDropdownFilter`
+- `ChoicesMultipleDropdownFilter`
+
+### Boolean Filters
+- `BooleanRadioFilter`: Radio buttons for Boolean fields (Yes/No/All).
+
+### Related Field Filters
+For ForeignKey/ManyToManyField fields:
+- `RelatedCheckboxFilter`
+- `RelatedDropdownFilter`
+- `MultipleRelatedDropdownFilter`
+- `AutocompleteSelectFilter`: Uses Django's autocomplete widget in filter.
+- `AutocompleteSelectMultipleFilter`: Autocomplete allowing multiple selections.
+
+### Date/Time Filters
+- `RangeDateFilter`: Date picker range input (From - To).
+- `RangeDateTimeFilter`: DateTime picker range input.
+
+**Usage Example:**
+
+```python
+from dashub.contrib.filters import (
+    BooleanRadioFilter, 
+    AutocompleteSelectFilter, 
+    RangeDateFilter
+)
+
+class MyModelAdmin(admin.ModelAdmin):
+    list_filter = (
+        ("is_active", BooleanRadioFilter),
+        ("user", AutocompleteSelectFilter),
+        ("created_at", RangeDateFilter),
+    )
+```
+
+## 11. **Full Configuration Example**
 
 Here is an example of a complete `DASHHUB_SETTINGS` configuration:
 

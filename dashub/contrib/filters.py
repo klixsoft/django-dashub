@@ -140,7 +140,6 @@ class RelatedCheckboxFilter(MultiValueMixin, admin.RelatedFieldListFilter):
         }
 
 
-
 class DropdownFilter(admin.SimpleListFilter):
     template = "dashub/filters/filters_field.html"
     form_class = DropdownForm

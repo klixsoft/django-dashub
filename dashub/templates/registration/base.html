@@ -31,8 +31,8 @@
     </style>
 
     <!-- favicons -->
-    <link rel="shortcut icon" href="{% static dashub_settings.site_icon %}">
-    <link rel="icon" href="{% static dashub_settings.site_icon %}" sizes="32x32">
+    <link rel="shortcut icon" href="{{ dashub_settings.site_icon }}">
+    <link rel="icon" href="{{ dashub_settings.site_icon }}" sizes="32x32">
 
     {% block extrastyle %} {% endblock %}
     {% block extrahead %} {% endblock %}

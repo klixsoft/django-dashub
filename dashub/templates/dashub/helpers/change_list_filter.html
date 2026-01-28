@@ -22,8 +22,11 @@
         <button type="submit" class="btn btn-primary btn-with-icon">
             <i class="hgi hgi-stroke hgi-filter"></i> {% trans "Apply Filter" %}
         </button>
-        <a href="{% url cl.opts|admin_urlname:'changelist' %}" class="btn btn-outline-secondary btn-with-icon mt-2">
-            <i class="hgi hgi-stroke hgi-cancel-circle"></i> {% trans "Clear All Filter" %}
-        </a>
+        {% safe_admin_changelist_url cl.opts as changelist_url %}
+        {% if changelist_url %}
+            <a href="{{ changelist_url }}" class="btn btn-outline-secondary btn-with-icon mt-2">
+                <i class="hgi hgi-stroke hgi-cancel-circle"></i> {% trans "Clear All Filter" %}
+            </a>
+        {% endif %}
     </div>
 </form>

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="django_dashub",
-    version="3.0.5",
+    version="3.0.8",
     author="Suresh Chand",
     author_email="scthakuri12a@gmail.com",
     description="A modern Django admin dashboard with enhanced customization options, inspired by Jazzmin but featuring a fresh theme and additional functionality.",

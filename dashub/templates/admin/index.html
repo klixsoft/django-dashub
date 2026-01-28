@@ -6,49 +6,208 @@
 {% block content_title %} {% trans 'Dashboard' %} {% endblock %}
 
 {% block breadcrumbs %}
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
-        <li class="breadcrumb-item">{% trans 'Dashboard' %}</li>
-    </ol>
+<ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+    <li class="breadcrumb-item">{% trans 'Dashboard' %}</li>
+</ol>
 {% endblock %}
 
 
 {% block content %}
-    {% get_side_menu using="app_list" as dashboard_list %}
-    {% if dashboard_list %}
-        {% widthratio dashboard_list|length 2 1 as middle %}
-    {% endif %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <div class="col-12">
-        {% get_dashub_settings request as dashub_settings %}
-        {% if dashub_settings.analytics_template %}
-            {% include dashub_settings.analytics_template with dashboard_list=dashboard_list %}
-        {% endif %}
+<!-- Load Analytics Data without API -->
+{% get_analytics_data as analytics %}
+{% get_side_menu using="app_list" as dashboard_list %}
 
-        {% if dashub_settings.include_dashboard_list %}
-            <div class="row">
-                {% for app in dashboard_list %}
-                    <div class="col-12 col-md-6 col-xl-4 mb-4">
-                        <div class="card dashboard_card">
-                            <div class="card-header">{{ app.name }}</div>
-                            <div class="card-body">
-                                <div>
-                                    {% for model in app.models %}
-                                        <a href="{% if model.url %}{{ model.url }}{% else %}#!{% endif %}"
-                                           class="text-reset fw-medium">
-                                            <div>
-                                                <i class="{{ model.icon }} text-muted"></i>
-                                                <p class="text-muted mb-0 text-truncate">{{ model.name }}</p>
-                                            </div>
-                                            <div>{{ model.count }}</div>
-                                        </a>
-                                    {% endfor %}
+<!-- Stats Row -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-4">
+        <div class="card border shadow-none h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted text-uppercase mb-2">Total Apps</h6>
+                        <h2 class="mb-0 fw-bold">{{ analytics.total_apps|default:"0" }}</h2>
+                    </div>
+                    <div class="icon-shape bg-primary text-white rounded p-3">
+                        <i class="fas fa-cubes fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card border shadow-none h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted text-uppercase mb-2">Total Models</h6>
+                        <h2 class="mb-0 fw-bold">{{ analytics.total_models|default:"0" }}</h2>
+                    </div>
+                    <div class="icon-shape bg-info text-white rounded p-3">
+                        <i class="fas fa-layer-group fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card border shadow-none h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted text-uppercase mb-2">Total Records</h6>
+                        <h2 class="mb-0 fw-bold">{{ analytics.total_records|default:"0" }}</h2>
+                    </div>
+                    <div class="icon-shape bg-success text-white rounded p-3">
+                        <i class="fas fa-database fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if analytics.series %}
+<div class="row mb-4">
+    <div class="col-12 col-lg-8 mb-4">
+        <div class="card border shadow-none h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0 fw-bold">Growth Trends</h5>
+            </div>
+            <div class="card-body" style="height: 300px;">
+                <canvas id="growthChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-4 mb-4">
+        <div class="card border shadow-none h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0 fw-bold">Activity Distribution</h5>
+            </div>
+            <div class="card-body" style="height: 300px;">
+                <canvas id="distChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Apps Grid -->
+<div class="row">
+    {% for app in dashboard_list %}
+    <div class="col-12 mb-4">
+        <h5 class="mb-3 text-muted fw-bold border-bottom pb-2">{{ app.name }}</h5>
+        <div class="row">
+            {% for model in app.models %}
+            <div class="col-12 col-md-6 col-lg-3 mb-4">
+                <a href="{% if model.url %}{{ model.url }}{% else %}#!{% endif %}" class="text-decoration-none">
+                    <div class="card border shadow-none h-100 hover-card transition-all">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3 text-primary opacity-75">
+                                    <i class="{{ model.icon|default:'fas fa-circle' }} fa-lg"></i>
                                 </div>
+                                <h6 class="mb-0 text-dark fw-bold text-truncate">{{ model.name }}</h6>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-end">
+                                <span class="text-muted small">Total Records</span>
+                                <span class="h4 mb-0 fw-bold text-dark">{{ model.count }}</span>
                             </div>
                         </div>
                     </div>
-                {% endfor %}
+                </a>
             </div>
-        {% endif %}
+            {% endfor %}
+        </div>
     </div>
+    {% endfor %}
+</div>
+</div>
+
+{% if analytics.series %}
+{{ analytics.series|json_script:"series-data" }}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const rawSeries = JSON.parse(document.getElementById('series-data').textContent);
+        const labels = [];
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            labels.push(d.toISOString().split('T')[0]);
+        }
+
+        const datasets = rawSeries.map((s, index) => {
+            const color = `hsl(${index * 60 + 200}, 70%, 50%)`;
+            const dataMap = {};
+            s.data.forEach(p => dataMap[p.date] = p.count);
+            return {
+                label: s.name,
+                data: labels.map(date => dataMap[date] || 0),
+                borderColor: color,
+                backgroundColor: color.replace(')', ', 0.1)').replace('hsl', 'hsla'),
+                fill: true,
+                tension: 0.4
+            };
+        });
+
+        // 1. Growth Line Chart
+        new Chart(document.getElementById('growthChart'), {
+            type: 'line',
+            data: { labels, datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                    y: { beginAtZero: true },
+                    x: {
+                        ticks: { maxTicksLimit: 8 }
+                    }
+                }
+            }
+        });
+
+        // 2. Distribution Pie Chart
+        const totalCounts = rawSeries.map(s => s.data.reduce((a, b) => a + b.count, 0));
+        new Chart(document.getElementById('distChart'), {
+            type: 'doughnut',
+            data: {
+                labels: rawSeries.map(s => s.name),
+                datasets: [{
+                    data: totalCounts,
+                    backgroundColor: rawSeries.map((s, i) => `hsl(${i * 60 + 200}, 70%, 60%)`)
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    });
+</script>
+{% endif %}
+
+<style>
+    .hover-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--primary) !important;
+    }
+
+    .transition-all {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .icon-shape {
+        width: 4rem;
+        height: 4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
 {% endblock %}
