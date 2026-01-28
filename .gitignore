@@ -3,7 +3,7 @@ docs/_build/
 dist
 *.egg-info
 *.pot
-.DS_store
+.DS_Store
 fabfile.py
 NOTES.md
 .tox/*
@@ -13,3 +13,5 @@ build
 .idea
 
 command.txt
+
+__pycache__/

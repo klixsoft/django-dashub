@@ -779,7 +779,7 @@ def get_analytics_data(context):
         {"model": "orders.order", "date_field": "created_at"}
     ]
     """
-    from django.db.models import Count
+    from django.db.models import Count, DateField, DateTimeField
     from django.db.models.functions import TruncDay
     from django.utils import timezone
     import datetime
@@ -788,6 +788,7 @@ def get_analytics_data(context):
     if not user:
         return {}
 
+    options = get_resolved_settings(context.request)
     configured_analytics = options.get("analytics_models", [])
     
     total_apps = 0
@@ -845,13 +846,31 @@ def get_analytics_data(context):
                 if model_key in hidden_models: continue
                 
                 try:
+                    count = model.objects.count()
                     if count == 0: continue
                     
                     date_field = None
-                    for field in model._meta.get_fields():
-                         if field.name in ['created_at', 'date_joined', 'timestamp', 'created']:
-                             date_field = field.name
-                             break
+                    model_date_fields = [
+                        f for f in model._meta.get_fields() 
+                        if isinstance(f, (DateField, DateTimeField))
+                    ]
+                    
+                    if not model_date_fields:
+                        continue
+
+                    for f in model_date_fields:
+                        if getattr(f, 'auto_now_add', False):
+                            date_field = f.name
+                            break
+                    
+                    if not date_field:
+                         for f in model_date_fields:
+                             if f.name in ['created_at', 'date_joined', 'timestamp', 'created']:
+                                 date_field = f.name
+                                 break
+                    
+                    if not date_field:
+                        date_field = model_date_fields[0].name
                     
                     if date_field:
                         candidates.append({
@@ -860,7 +879,7 @@ def get_analytics_data(context):
                             "field": date_field,
                             "count": count
                         })
-                except:
+                except Exception:
                     pass
         
         candidates.sort(key=lambda x: x["count"], reverse=True)
