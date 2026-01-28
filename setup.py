@@ -3,8 +3,8 @@ from setuptools import setup, find_packages
 setup(
     name="django_dashub",
     version="4.0.0",
-    author="Suresh Chand",
-    author_email="scthakuri12a@gmail.com",
+    author="Klix Soft Private Limited",
+    author_email="info@klixsoft.com",
     description="A modern Django admin dashboard with enhanced customization options, inspired by Jazzmin but featuring a fresh theme and additional functionality.",
     packages=find_packages(),
     license="BSD",
@@ -35,7 +35,7 @@ setup(
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     project_urls={
-        "Bug Reports": "https://github.com/scthakuri/django-dashub/issues",
-        "Source": "https://github.com/scthakuri/django-dashub",
+        "Bug Reports": "https://github.com/klixsoft/django-dashub/issues",
+        "Source": "https://github.com/klixsoft/django-dashub",
     },
 )
