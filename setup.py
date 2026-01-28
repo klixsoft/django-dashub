@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="django_dashub",
     version="4.0.0",
-    author="Klix Soft Private Limited",
+    author="KlixSoft",
     author_email="info@klixsoft.com",
     description="A modern Django admin dashboard with enhanced customization options, inspired by Jazzmin but featuring a fresh theme and additional functionality.",
     packages=find_packages(),
